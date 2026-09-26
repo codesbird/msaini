@@ -1,0 +1,6 @@
+# Vercel deployment ignore
+preview_templates/
+.git
+.github
+*.log
+.env*.local
