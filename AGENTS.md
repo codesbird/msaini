@@ -14,5 +14,7 @@ This file serves as persistent workspace memory and operating guidelines for all
 - **Framework**: Next.js 15 App Router, TypeScript, Tailwind CSS, React 19.
 - **Theme**: Agentic Terminal & Telemetry (`#08090d` dark slate with cyan `#06b6d4` & emerald `#10b981` accents).
 - **Header Directive**: Latency indicator is permanently excluded from header per user preference.
-- **Data Source**: Always maintain [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts) as the single source of truth for all content, stats, projects, and skills.
+- **Data Source**: Always maintain [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts) as the single source of truth for all content, stats, projects, and skills, with real-time cloud persistence via **Firebase Realtime Database** (`src/lib/firebase.ts` & `src/lib/portfolio-service.ts`).
+- **Dynamic Admin Dashboard**: Dedicated CMS control panel at `/admin` (passphrase protected: default `monu2026`) for live edits across all sections.
+- **File & Image Uploads**: **Vercel Blob Storage** (`@vercel/blob` via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets.
 - **AI Digital Twin**: Managed via [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with curated QA and semantic matching.

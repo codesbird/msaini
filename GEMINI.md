@@ -23,7 +23,9 @@
 - **Theme**: **Agentic Terminal & Telemetry** (Cyber-clean dark aesthetic: `#08090d` slate, emerald `#10b981`, and cyan `#06b6d4` glowing accents, `JetBrains Mono` and `Space Grotesk` typography).
 - **Framework**: **Next.js 15 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS**.
 - **Header Preference**: **No latency indicator** in the telemetry header (keep clean `REGION: IN-NORTH` and `UPTIME: 99.98%` only).
-- **Data Source**: Decoupled single source of truth in [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts). Always update or read profile information from this central file.
+- **Data Source**: Decoupled single source of truth in [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts) with real-time cloud synchronization via **Firebase Realtime Database** (`src/lib/firebase.ts` & `src/lib/portfolio-service.ts`).
+- **Dynamic Admin Dashboard**: Accessible at `/admin` (passphrase protected: default `monu2026`) allowing live edits to Hero, Metrics, Projects, Skills, Timeline, and Digital Twin QA.
+- **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets.
 - **AI Agent API**: Next.js App Router Route Handler at [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with intelligent semantic response synthesis.
 
 ---
