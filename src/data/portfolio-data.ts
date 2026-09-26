@@ -1,6 +1,6 @@
-import { Project, Experience, Education, SkillCategory, DigitalTwinQA } from "@/types/portfolio";
+import { Project, Experience, Education, SkillCategory, DigitalTwinQA, PersonalInfo } from "@/types/portfolio";
 
-export const personalInfo = {
+export const personalInfo: PersonalInfo = {
   name: "Monu Saini",
   handle: "tech2saini",
   pronouns: "He/Him",

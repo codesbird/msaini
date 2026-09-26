@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { personalInfo } from "@/data/portfolio-data";
+import { PersonalInfo } from "@/types/portfolio";
+import { personalInfo as defaultPersonalInfo } from "@/data/portfolio-data";
 import { Mail, Phone, MapPin, Linkedin, Github, Send, Check, Copy } from "lucide-react";
 
-export function ContactSection() {
+export function ContactSection({ data }: { data?: PersonalInfo }) {
+  const info: PersonalInfo = data || defaultPersonalInfo;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,7 +19,6 @@ export function ContactSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate sending message
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -25,7 +27,7 @@ export function ContactSection() {
   };
 
   const copyEmail = () => {
-    navigator.clipboard.writeText(personalInfo.email);
+    navigator.clipboard.writeText(info.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };
@@ -57,10 +59,10 @@ export function ContactSection() {
                 <div className="truncate">
                   <span className="text-[10px] text-slate-500 block uppercase">Primary Email</span>
                   <a
-                    href={`mailto:${personalInfo.email}`}
+                    href={`mailto:${info.email}`}
                     className="text-white hover:text-cyan-400 transition-colors truncate block"
                   >
-                    {personalInfo.email}
+                    {info.email}
                   </a>
                 </div>
               </div>
@@ -78,8 +80,8 @@ export function ContactSection() {
               <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
               <div>
                 <span className="text-[10px] text-slate-500 block uppercase">Phone / WhatsApp</span>
-                <a href={`tel:${personalInfo.phone}`} className="text-white hover:text-emerald-400 transition-colors">
-                  {personalInfo.phone}
+                <a href={`tel:${info.phone}`} className="text-white hover:text-emerald-400 transition-colors">
+                  {info.phone}
                 </a>
               </div>
             </div>
@@ -89,24 +91,24 @@ export function ContactSection() {
               <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
               <div>
                 <span className="text-[10px] text-slate-500 block uppercase">Base Location</span>
-                <span className="text-slate-300">{personalInfo.location}</span>
+                <span className="text-slate-300">{info.location}</span>
               </div>
             </div>
 
             {/* Social Links */}
             <div className="pt-2 flex flex-col sm:flex-row gap-2">
               <a
-                href={personalInfo.linkedin}
+                href={info.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 p-2.5 rounded-xl bg-blue-950/40 border border-blue-800/50 hover:bg-blue-900/40 text-blue-300 flex items-center justify-center gap-2 transition-all font-semibold"
               >
                 <Linkedin className="w-4 h-4" />
-                <span>LinkedIn ({personalInfo.followersCount})</span>
+                <span>LinkedIn ({info.followersCount})</span>
               </a>
 
               <a
-                href={personalInfo.github}
+                href={info.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 flex items-center justify-center gap-2 transition-all font-semibold"
@@ -134,7 +136,7 @@ export function ContactSection() {
                 <Check className="w-8 h-8 mx-auto text-emerald-400" />
                 <h4 className="font-bold text-sm">Transmission Received!</h4>
                 <p className="text-xs text-slate-300 font-sans">
-                  Thank you for reaching out. Monu will review your message and reply via email or phone shortly.
+                  Thank you for reaching out. {info.name.split(" ")[0]} will review your message and reply via email or phone shortly.
                 </p>
               </div>
             ) : (
@@ -194,7 +196,7 @@ export function ContactSection() {
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-teal-500 text-slate-950 font-bold text-xs hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>TRANSMIT MESSAGE TO MONU</span>
+                  <span>TRANSMIT MESSAGE TO {info.name.toUpperCase()}</span>
                 </button>
               </>
             )}

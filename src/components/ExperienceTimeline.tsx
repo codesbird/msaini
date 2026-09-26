@@ -1,8 +1,18 @@
 import React from "react";
-import { experienceData, educationData } from "@/data/portfolio-data";
+import { Experience, Education } from "@/types/portfolio";
+import { experienceData as defaultExperienceData, educationData as defaultEducationData } from "@/data/portfolio-data";
 import { Briefcase, GraduationCap, Calendar, MapPin, CheckCircle } from "lucide-react";
 
-export function ExperienceTimeline() {
+export function ExperienceTimeline({
+  expItems,
+  eduItems,
+}: {
+  expItems?: Experience[];
+  eduItems?: Education[];
+}) {
+  const experiences = expItems && expItems.length > 0 ? expItems : defaultExperienceData;
+  const educations = eduItems && eduItems.length > 0 ? eduItems : defaultEducationData;
+
   return (
     <section id="experience" className="space-y-12">
       {/* Experience Section */}
@@ -15,7 +25,7 @@ export function ExperienceTimeline() {
         </div>
 
         <div className="space-y-6">
-          {experienceData.map((exp, idx) => (
+          {experiences.map((exp, idx) => (
             <div
               key={idx}
               className="p-6 sm:p-7 rounded-2xl bg-term-card border border-term-border space-y-4 font-mono hover:border-slate-700 transition-all"
@@ -43,7 +53,7 @@ export function ExperienceTimeline() {
               </div>
 
               <div className="space-y-2 text-xs text-slate-300 font-sans leading-relaxed">
-                {exp.description.map((bullet, bIdx) => (
+                {exp.description?.map((bullet, bIdx) => (
                   <div key={bIdx} className="flex items-start space-x-2">
                     <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-1" />
                     <span>{bullet}</span>
@@ -52,7 +62,7 @@ export function ExperienceTimeline() {
               </div>
 
               <div className="flex flex-wrap gap-1.5 pt-2">
-                {exp.skills.map((s, sIdx) => (
+                {exp.skills?.map((s, sIdx) => (
                   <span
                     key={sIdx}
                     className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[11px] text-slate-300"
@@ -74,7 +84,7 @@ export function ExperienceTimeline() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-          {educationData.map((edu, idx) => (
+          {educations.map((edu, idx) => (
             <div
               key={idx}
               className="p-6 rounded-2xl bg-term-card border border-term-border flex flex-col justify-between space-y-4 hover:border-emerald-500/30 transition-all"
@@ -94,7 +104,7 @@ export function ExperienceTimeline() {
                 </div>
 
                 <div className="text-[11px] text-slate-300 font-sans space-y-1 pt-1 leading-relaxed">
-                  {edu.highlights.map((h, hIdx) => (
+                  {edu.highlights?.map((h, hIdx) => (
                     <p key={hIdx} className="text-slate-400">
                       • {h}
                     </p>

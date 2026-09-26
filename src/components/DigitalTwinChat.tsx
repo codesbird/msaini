@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { digitalTwinQA, personalInfo } from "@/data/portfolio-data";
+import { DigitalTwinQA, PersonalInfo } from "@/types/portfolio";
+import { digitalTwinQA as defaultDigitalTwinQA, personalInfo as defaultPersonalInfo } from "@/data/portfolio-data";
 import { Bot, Send, Sparkles, CornerDownLeft, User } from "lucide-react";
 
 interface Message {
@@ -10,11 +11,20 @@ interface Message {
   time: string;
 }
 
-export function DigitalTwinChat() {
+export function DigitalTwinChat({
+  qaList,
+  info,
+}: {
+  qaList?: DigitalTwinQA[];
+  info?: PersonalInfo;
+}) {
+  const activeQA = qaList && qaList.length > 0 ? qaList : defaultDigitalTwinQA;
+  const activeInfo: PersonalInfo = info || defaultPersonalInfo;
+
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "agent",
-      text: `Hello! I am ${personalInfo.name}'s Digital Twin (AI Agent Proxy). Ask me anything about Monu's hands-on experience with Python, AI agent workflows (n8n, MCP), backend architectures, or his availability for full-time Software Developer roles!`,
+      text: `Hello! I am ${activeInfo.name}'s Digital Twin (AI Agent Proxy). Ask me anything about Monu's hands-on experience with Python, AI agent workflows (n8n, MCP), backend architectures, or his availability for full-time Software Developer roles!`,
       time: "Just now",
     },
   ]);
@@ -32,7 +42,7 @@ export function DigitalTwinChat() {
     // 1. First check if there is an exact or close match in curated QA
     const lowerQuery = query.toLowerCase();
 
-    for (const qa of digitalTwinQA) {
+    for (const qa of activeQA) {
       if (
         lowerQuery.includes(qa.question.toLowerCase().slice(0, 15)) ||
         qa.keywords.some((k) => lowerQuery.includes(k))
@@ -57,7 +67,7 @@ export function DigitalTwinChat() {
     }
 
     // 3. Smart contextual fallback
-    return `Thank you for asking! Monu is a dedicated Python Developer with 2+ years of experience in backend development, AI agent pipelines (n8n, MCP), and web applications. He holds an MCA degree from AKTU and is actively interviewing for Software Developer opportunities in Delhi NCR, Jaipur, or Remote. Feel free to connect directly via email at ${personalInfo.email} or LinkedIn at ${personalInfo.linkedin}.`;
+    return `Thank you for asking! ${activeInfo.name} is a dedicated Python Developer with 2+ years of experience in backend development, AI agent pipelines (n8n, MCP), and web applications. He holds an MCA degree from AKTU and is actively interviewing for Software Developer opportunities in Delhi NCR, Jaipur, or Remote. Feel free to connect directly via email at ${activeInfo.email} or LinkedIn at ${activeInfo.linkedin}.`;
   };
 
   const handleSend = async (textToSend: string) => {
@@ -106,13 +116,13 @@ export function DigitalTwinChat() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-white font-mono">Ask Monu&apos;s Digital Twin</h2>
+                <h2 className="text-xl font-bold text-white font-mono">Ask {activeInfo.name.split(" ")[0]}&apos;s Digital Twin</h2>
                 <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">
                   AI AGENT PROXY
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Trained on Monu&apos;s Python engineering skills, projects, and career background.
+                Trained on {activeInfo.name}&apos;s Python engineering skills, projects, and career background.
               </p>
             </div>
           </div>
@@ -176,7 +186,7 @@ export function DigitalTwinChat() {
             <span>Suggested prompts:</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-            {digitalTwinQA.slice(0, 4).map((qa, idx) => (
+            {activeQA.slice(0, 4).map((qa, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(qa.question)}

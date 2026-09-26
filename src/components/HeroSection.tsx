@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { personalInfo } from "@/data/portfolio-data";
-import { Bot, FolderGit2, Copy, Check, Cpu, Sparkles, Linkedin, MapPin, Mail } from "lucide-react";
+import { PersonalInfo } from "@/types/portfolio";
+import { personalInfo as defaultPersonalInfo } from "@/data/portfolio-data";
+import { Bot, FolderGit2, Copy, Check, Cpu, Sparkles, Linkedin, MapPin, Mail, FileText } from "lucide-react";
 
-export function HeroSection() {
+export function HeroSection({ data }: { data?: PersonalInfo }) {
   const [copied, setCopied] = useState(false);
-  const cliSnippet = `npx ${personalInfo.handle} --connect --role=python-sde`;
+  const info: PersonalInfo = data || defaultPersonalInfo;
+  const cliSnippet = `npx ${info.handle} --connect --role=python-sde`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(cliSnippet);
@@ -20,13 +22,13 @@ export function HeroSection() {
       {/* Badge */}
       <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 font-mono text-xs">
         <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-        <span className="font-semibold uppercase tracking-wider">{personalInfo.statusBadge}</span>
+        <span className="font-semibold uppercase tracking-wider">{info.statusBadge}</span>
       </div>
 
       {/* Main Headline */}
       <div className="space-y-3">
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-          Hi, I&apos;m <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-300">{personalInfo.name}</span>.
+          Hi, I&apos;m <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-300">{info.name}</span>.
           <br />
           <span className="text-3xl sm:text-4xl lg:text-5xl text-slate-300 font-normal">
             Building Autonomous AI Agents &amp; Resilient Backends.
@@ -34,7 +36,7 @@ export function HeroSection() {
         </h1>
 
         <p className="text-base sm:text-lg text-slate-400 max-w-3xl leading-relaxed pt-1">
-          {personalInfo.bio}
+          {info.bio}
         </p>
       </div>
 
@@ -43,7 +45,7 @@ export function HeroSection() {
         <div className="flex items-center space-x-2 truncate">
           <span className="text-cyan-400 font-bold">$</span>
           <span className="text-emerald-400">npx</span>
-          <span className="text-slate-200">{personalInfo.handle} --connect --role=python-sde</span>
+          <span className="text-slate-200">{info.handle} --connect --role=python-sde</span>
         </div>
         <button
           onClick={copyToClipboard}
@@ -93,12 +95,12 @@ export function HeroSection() {
       <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-1">
         <div className="flex items-center gap-1">
           <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-          <span>{personalInfo.location}</span>
+          <span>{info.location}</span>
         </div>
         <span className="text-slate-600">|</span>
         <div>
           <span>Targeting: </span>
-          <span className="text-slate-300">{personalInfo.preferredLocations.join(", ")}</span>
+          <span className="text-slate-300">{info.preferredLocations?.join(", ") || "Noida, Gurugram, Delhi, Remote"}</span>
         </div>
       </div>
 
@@ -121,14 +123,26 @@ export function HeroSection() {
         </Link>
 
         <a
-          href={personalInfo.linkedin}
+          href={info.linkedin}
           target="_blank"
           rel="noopener noreferrer"
           className="px-4 py-2.5 rounded-lg bg-blue-950/50 text-blue-300 border border-blue-800/50 hover:bg-blue-900/50 text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all"
         >
           <Linkedin className="w-4 h-4" />
-          <span>LinkedIn ({personalInfo.followersCount})</span>
+          <span>LinkedIn ({info.followersCount})</span>
         </a>
+
+        {info.resumeUrl && (
+          <a
+            href={info.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2.5 rounded-lg bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 hover:bg-emerald-900/40 text-xs sm:text-sm font-semibold flex items-center gap-2 transition-all"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Resume (PDF)</span>
+          </a>
+        )}
       </div>
     </section>
   );

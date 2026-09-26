@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { personalInfo, projects, skillCategories, experienceData, educationData } from "@/data/portfolio-data";
+import { PortfolioData } from "@/types/portfolio";
+import {
+  personalInfo as defaultPersonalInfo,
+  projects as defaultProjects,
+  skillCategories as defaultSkillCategories,
+  experienceData as defaultExperienceData,
+  educationData as defaultEducationData,
+} from "@/data/portfolio-data";
 import { Terminal, Copy, Check, RotateCcw } from "lucide-react";
 
 interface HistoryItem {
@@ -9,12 +16,17 @@ interface HistoryItem {
   output: string | React.ReactNode;
 }
 
-export function TerminalEmulator() {
+export function TerminalEmulator({ data }: { data?: PortfolioData }) {
+  const pInfo = data?.personalInfo || defaultPersonalInfo;
+  const pProjects = data?.projects || defaultProjects;
+  const pExp = data?.experienceData || defaultExperienceData;
+  const pEdu = data?.educationData || defaultEducationData;
+
   const [inputVal, setInputVal] = useState("");
   const [history, setHistory] = useState<HistoryItem[]>([
     {
       command: "whoami",
-      output: `${personalInfo.name} // ${personalInfo.title}. ${personalInfo.subtitle}.\nBased in ${personalInfo.location}. Open to full-time SDE roles.`,
+      output: `${pInfo.name} // ${pInfo.title}. ${pInfo.subtitle}.\nBased in ${pInfo.location}. Open to full-time SDE roles.`,
     },
     {
       command: "skills --summary",
@@ -50,19 +62,19 @@ export function TerminalEmulator() {
         output = `Available system commands:
   - whoami       : Identity, current focus & background
   - skills       : Full breakdown of Python, AI, Backend & Cloud skills
-  - projects     : Production systems (WhatsApp Agent, Fake News ML, KSecure, MCP)
+  - projects     : Production systems (${pProjects.map((p) => p.title.slice(0, 15)).join(", ")}...)
   - experience   : Professional timeline & freelance client deliverables
-  - education    : Degrees (MCA from AKTU, BCA from RU, IANT Diploma)
+  - education    : Degrees (${pEdu.map((e) => e.degree.slice(0, 10)).join(", ")}...)
   - contact      : Direct email, phone, location & LinkedIn
   - hire         : Launch hiring protocol & quick connect
   - clear        : Wipe the terminal buffer`;
         break;
 
       case "whoami":
-        output = `${personalInfo.name} — ${personalInfo.title}
-MCA Graduate (AKTU) & BCA (Rajasthan University).
+        output = `${pInfo.name} — ${pInfo.title}
+${pEdu[0]?.degree || "MCA Graduate"} & Foundations.
 2+ years building high-leverage Python automation pipelines, AI agent workflows (n8n, MCP), and resilient backends.
-Current Status: ${personalInfo.statusBadge} (${personalInfo.preferredLocations.join(", ")} or Remote).`;
+Current Status: ${pInfo.statusBadge} (${pInfo.preferredLocations?.join(", ") || "Delhi, Jaipur, Remote"}).`;
         break;
 
       case "skills":
@@ -74,7 +86,7 @@ Current Status: ${personalInfo.statusBadge} (${personalInfo.preferredLocations.j
         break;
 
       case "projects":
-        output = projects
+        output = pProjects
           .map(
             (p, idx) =>
               `[${idx + 1}] ${p.title}
@@ -86,7 +98,7 @@ Current Status: ${personalInfo.statusBadge} (${personalInfo.preferredLocations.j
         break;
 
       case "experience":
-        output = experienceData
+        output = pExp
           .map(
             (e) =>
               `[ROLE] ${e.role} @ ${e.company} (${e.period})
@@ -98,27 +110,27 @@ ${e.description.map((d) => `  • ${d}`).join("\n")}`
         break;
 
       case "education":
-        output = educationData
+        output = pEdu
           .map((ed) => `• ${ed.degree} — ${ed.institution} (${ed.period}) [${ed.grade}]`)
           .join("\n");
         break;
 
       case "contact":
         output = `DIRECT CHANNELS:
-Email:    ${personalInfo.email}
-Phone:    ${personalInfo.phone}
-LinkedIn: ${personalInfo.linkedin}
-GitHub:   ${personalInfo.github}
-Location: ${personalInfo.location}`;
+Email:    ${pInfo.email}
+Phone:    ${pInfo.phone}
+LinkedIn: ${pInfo.linkedin}
+GitHub:   ${pInfo.github}
+Location: ${pInfo.location}`;
         break;
 
       case "hire":
       case "sudo hire":
         output = `[INITIATING HIRE PROTOCOL]
-Target Candidate: ${personalInfo.name}
+Target Candidate: ${pInfo.name}
 Role Fit: Software Developer / Python Backend SDE / AI Automation Engineer
 Status: Immediately Available for Interview & Onboarding
-Reach out directly via email (${personalInfo.email}) or phone (${personalInfo.phone})!`;
+Reach out directly via email (${pInfo.email}) or phone (${pInfo.phone})!`;
         break;
 
       default:
@@ -186,7 +198,7 @@ Reach out directly via email (${personalInfo.email}) or phone (${personalInfo.ph
         {history.map((item, idx) => (
           <div key={idx} className="space-y-1">
             <div className="flex items-center space-x-2">
-              <span className="text-emerald-400">visitor@monusaini</span>:
+              <span className="text-emerald-400">visitor@{pInfo.handle}</span>:
               <span className="text-cyan-400">~</span>$
               <span className="text-white font-semibold">{item.command}</span>
             </div>

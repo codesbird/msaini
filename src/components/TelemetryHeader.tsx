@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { personalInfo } from "@/data/portfolio-data";
-import { Terminal, Menu, X } from "lucide-react";
+import { PersonalInfo } from "@/types/portfolio";
+import { personalInfo as defaultPersonalInfo } from "@/data/portfolio-data";
+import { Terminal, Menu, X, Shield } from "lucide-react";
 
-export function TelemetryHeader() {
+export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const info: PersonalInfo = data || defaultPersonalInfo;
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-term-bg/90 border-b border-term-border">
@@ -19,15 +21,15 @@ export function TelemetryHeader() {
           </span>
           <Link href="#about" className="font-bold text-white tracking-wider hover:text-cyan-400 transition-colors flex items-center gap-1.5">
             <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-            <span>DEV_AGENT::{personalInfo.handle.toUpperCase()}</span>
+            <span>DEV_AGENT::{info.handle.toUpperCase()}</span>
           </Link>
           <span className="hidden lg:inline text-slate-600">|</span>
           <span className="hidden lg:inline text-slate-400">
-            STATUS: <span className="text-emerald-400 font-semibold">{personalInfo.availabilityStatus}</span>
+            STATUS: <span className="text-emerald-400 font-semibold">{info.availabilityStatus}</span>
           </span>
         </div>
 
-        {/* Center: Live Telemetry */}
+        {/* Center: Live Telemetry (No latency per user directive) */}
         <div className="hidden md:flex items-center space-x-6 text-slate-400">
           <div>
             REGION: <span className="text-purple-400 font-mono">IN-NORTH</span>
@@ -61,10 +63,24 @@ export function TelemetryHeader() {
           >
             HIRE_ME
           </Link>
+          <Link
+            href="/admin"
+            className="text-slate-500 hover:text-cyan-300 p-1 rounded"
+            title="Admin CMS Dashboard"
+          >
+            <Shield className="w-3.5 h-3.5" />
+          </Link>
         </nav>
 
         {/* Mobile menu button */}
         <div className="flex items-center space-x-2 lg:hidden">
+          <Link
+            href="/admin"
+            className="p-1.5 text-slate-400 hover:text-cyan-400"
+            title="Admin Dashboard"
+          >
+            <Shield className="w-3.5 h-3.5" />
+          </Link>
           <Link
             href="#contact"
             className="bg-cyan-950/60 text-cyan-400 border border-cyan-800/80 px-2 py-1 rounded text-[11px] font-semibold"
@@ -126,6 +142,14 @@ export function TelemetryHeader() {
             className="block text-cyan-400 hover:text-cyan-300 py-1 font-semibold"
           >
             06. CONTACT &amp; HIRE
+          </Link>
+          <Link
+            href="/admin"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-purple-400 hover:text-purple-300 py-1 border-t border-slate-800 pt-2 flex items-center gap-1.5"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>ADMIN CMS DASHBOARD</span>
           </Link>
         </div>
       )}

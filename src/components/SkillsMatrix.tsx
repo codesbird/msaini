@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { skillCategories } from "@/data/portfolio-data";
-import { Code2, Server, Sparkles, Cloud, Check } from "lucide-react";
+import { SkillCategory } from "@/types/portfolio";
+import { skillCategories as defaultSkillCategories } from "@/data/portfolio-data";
+import { Code2, Server, Sparkles, Cloud } from "lucide-react";
 
-export function SkillsMatrix() {
+export function SkillsMatrix({ categories }: { categories?: SkillCategory[] }) {
   const [activeTab, setActiveTab] = useState<string>("all");
+  const allCats = categories && categories.length > 0 ? categories : defaultSkillCategories;
 
   const icons: Record<string, React.ReactNode> = {
     code: <Code2 className="w-4 h-4 text-cyan-400" />,
@@ -16,8 +18,8 @@ export function SkillsMatrix() {
 
   const filteredCategories =
     activeTab === "all"
-      ? skillCategories
-      : skillCategories.filter((cat) => {
+      ? allCats
+      : allCats.filter((cat) => {
           if (activeTab === "backend") return cat.title.includes("Backend") || cat.title.includes("Languages");
           if (activeTab === "ai") return cat.title.includes("AI");
           if (activeTab === "cloud") return cat.title.includes("Cloud");
@@ -93,7 +95,7 @@ export function SkillsMatrix() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {category.skills.map((skill, sIdx) => (
+              {category.skills?.map((skill, sIdx) => (
                 <div
                   key={sIdx}
                   className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-between font-mono text-xs hover:border-cyan-500/30 transition-all"

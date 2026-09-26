@@ -1,3 +1,35 @@
+export interface PersonalInfo {
+  name: string;
+  handle: string;
+  pronouns: string;
+  title: string;
+  subtitle: string;
+  statusBadge: string;
+  availabilityStatus: string;
+  openToRoles: string[];
+  preferredLocations: string[];
+  location: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  github: string;
+  yearsOfExp: string;
+  aiProjectsCount: string;
+  clientSatisfaction: string;
+  followersCount: string;
+  bio: string;
+  avatarUrl?: string;
+  resumeUrl?: string;
+}
+
+export interface MetricItem {
+  label: string;
+  value: string;
+  subtext: string;
+  icon?: string;
+  color?: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -8,6 +40,7 @@ export interface Project {
   description: string;
   highlights: string[];
   techStack: string[];
+  imageUrl?: string;
   metrics: {
     label: string;
     value: string;
@@ -51,4 +84,15 @@ export interface DigitalTwinQA {
   question: string;
   answer: string;
   keywords: string[];
+}
+
+export interface PortfolioData {
+  personalInfo: PersonalInfo;
+  metrics: MetricItem[];
+  projects: Project[];
+  skillCategories: SkillCategory[];
+  experienceData: Experience[];
+  educationData: Education[];
+  digitalTwinQA: DigitalTwinQA[];
+  lastUpdated?: string;
 }
