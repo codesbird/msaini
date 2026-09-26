@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDE Portfolio // Systems &amp; Architecture Editorial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:italic,wght@0,400;1,400&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Instrument Serif', 'serif'],
+            sans: ['Geist', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
+          },
+          colors: {
+            arch: {
+              bg: '#0c0d12',
+              card: '#12141c',
+              border: '#1f2333',
+              accent: '#f59e0b',
+              sky: '#38bdf8',
+              muted: '#71788e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0c0d12;
+      color: #e2e8f0;
+      font-family: 'Geist', sans-serif;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .editorial-quote {
+      border-left: 2px solid #f59e0b;
+      padding-left: 1.25rem;
+      font-style: italic;
+    }
+    .node-active {
+      border-color: #f59e0b !important;
+      background-color: rgba(245, 158, 11, 0.08) !important;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-amber-500/20 selection:text-amber-200">
+
+  <!-- Editorial Top Masthead -->
+  <header class="border-b border-arch-border bg-arch-bg/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <span class="font-serif text-2xl tracking-wide text-white">Alex Chen</span>
+        <span class="text-xs font-mono text-arch-muted uppercase tracking-wider hidden sm:inline">/ Staff Systems &amp; AI Architect</span>
+      </div>
+
+      <nav class="flex items-center space-x-6 text-xs font-mono text-arch-muted">
+        <a href="#principles" class="hover:text-amber-400 transition-colors">PRINCIPLES</a>
+        <a href="#architecture" class="hover:text-amber-400 transition-colors">SYSTEM_BLUEPRINT</a>
+        <a href="#case-studies" class="hover:text-amber-400 transition-colors">RFC_STUDIES</a>
+        <a href="#publications" class="hover:text-amber-400 transition-colors">PUBLICATIONS</a>
+        <a href="#contact" class="px-3 py-1 rounded border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 transition-all">ENGAGE</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-16 space-y-24">
+
+    <!-- Hero / Thesis Statement -->
+    <section class="space-y-8 max-w-4xl">
+      <div class="inline-flex items-center space-x-2 text-xs font-mono text-amber-400 uppercase tracking-widest">
+        <span>ARCHITECTURAL DOSSIER</span>
+        <span>•</span>
+        <span>VOLUME 2026</span>
+      </div>
+
+      <h1 class="text-5xl sm:text-6xl lg:text-7xl font-serif text-white leading-none font-normal">
+        Engineering Deterministic Reliability into <span class="italic text-amber-400">Probabilistic Systems.</span>
+      </h1>
+
+      <p class="text-xl text-slate-300 font-light leading-relaxed max-w-3xl">
+        I am a software development engineer focused on distributed core infrastructure, high-throughput streaming systems, and enterprise LLM inference mesh orchestration.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-arch-border font-mono text-xs">
+        <div>
+          <span class="text-arch-muted block">SPECIALIZATION</span>
+          <span class="text-white font-medium mt-1 block">Distributed Systems &amp; AI Edge</span>
+        </div>
+        <div>
+          <span class="text-arch-muted block">CORE FOUNDATION</span>
+          <span class="text-white font-medium mt-1 block">Go • Rust • C++ • Python • Kubernetes</span>
+        </div>
+        <div>
+          <span class="text-arch-muted block">ENGAGEMENT TARGET</span>
+          <span class="text-amber-400 font-medium mt-1 block">Principal / Staff SDE Roles</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Architecture Blueprint Visualizer -->
+    <section id="architecture" class="space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-arch-border pb-4 gap-2">
+        <div>
+          <span class="text-xs font-mono text-amber-400 tracking-wider uppercase">// INTERACTIVE BLUEPRINT</span>
+          <h2 class="text-3xl font-serif text-white mt-1">Multi-Tier AI Inference Mesh</h2>
+        </div>
+        <p class="text-xs font-mono text-arch-muted">Click any component node to inspect architectural telemetry</p>
+      </div>
+
+      <!-- Node Graph Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Architecture Diagram Canvas (8 cols) -->
+        <div class="lg:col-span-8 bg-arch-card border border-arch-border rounded-2xl p-6 space-y-6">
+          <div class="flex items-center justify-between text-xs font-mono text-arch-muted border-b border-arch-border/60 pb-3">
+            <span>TOPOLOGY: DISTRIBUTED HIGH-AVAILABILITY CLUSTER</span>
+            <span class="text-emerald-400">● LIVE RUNTIME</span>
+          </div>
+
+          <!-- Flowchart Nodes -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+            
+            <!-- Node 1 -->
+            <div onclick="selectNode('gateway')" id="node-gateway" class="node-active p-4 rounded-xl border border-arch-border bg-slate-900/60 cursor-pointer transition-all hover:border-amber-400/60">
+              <div class="flex justify-between items-center text-[10px] text-arch-muted mb-2">
+                <span>01. INGRESS</span>
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+              </div>
+              <div class="font-bold text-white text-sm">Edge Gateway</div>
+              <div class="text-[11px] text-slate-400 mt-1">Envoy + Token Rate Limiter</div>
+              <div class="text-amber-400 text-[10px] mt-2">Latency: &lt; 2ms</div>
+            </div>
+
+            <!-- Node 2 -->
+            <div onclick="selectNode('router')" id="node-router" class="p-4 rounded-xl border border-arch-border bg-slate-900/60 cursor-pointer transition-all hover:border-amber-400/60">
+              <div class="flex justify-between items-center text-[10px] text-arch-muted mb-2">
+                <span>02. DISPATCH</span>
+                <i data-lucide="git-fork" class="w-3.5 h-3.5 text-sky-400"></i>
+              </div>
+              <div class="font-bold text-white text-sm">Semantic Router</div>
+              <div class="text-[11px] text-slate-400 mt-1">Intent Classifier &amp; Cache</div>
+              <div class="text-sky-400 text-[10px] mt-2">Hit Ratio: 44.8%</div>
+            </div>
+
+            <!-- Node 3 -->
+            <div onclick="selectNode('swarm')" id="node-swarm" class="p-4 rounded-xl border border-arch-border bg-slate-900/60 cursor-pointer transition-all hover:border-amber-400/60">
+              <div class="flex justify-between items-center text-[10px] text-arch-muted mb-2">
+                <span>03. COMPUTE</span>
+                <i data-lucide="cpu" class="w-3.5 h-3.5 text-purple-400"></i>
+              </div>
+              <div class="font-bold text-white text-sm">Agent Swarm Mesh</div>
+              <div class="text-[11px] text-slate-400 mt-1">Temporal Directed Graph</div>
+              <div class="text-purple-400 text-[10px] mt-2">Stateful Checkpoints</div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Row Nodes -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs pt-2">
+            
+            <!-- Node 4 -->
+            <div onclick="selectNode('vector')" id="node-vector" class="p-4 rounded-xl border border-arch-border bg-slate-900/60 cursor-pointer transition-all hover:border-amber-400/60">
+              <div class="flex justify-between items-center text-[10px] text-arch-muted mb-2">
+                <span>04. MEMORY STORE</span>
+                <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i>
+              </div>
+              <div class="font-bold text-white text-sm">Qdrant / PgVector Shard</div>
+              <div class="text-[11px] text-slate-400 mt-1">HNSW Index with Scalar Quantization</div>
+              <div class="text-emerald-400 text-[10px] mt-2">Scale: 100M+ Vectors</div>
+            </div>
+
+            <!-- Node 5 -->
+            <div onclick="selectNode('stream')" id="node-stream" class="p-4 rounded-xl border border-arch-border bg-slate-900/60 cursor-pointer transition-all hover:border-amber-400/60">
+              <div class="flex justify-between items-center text-[10px] text-arch-muted mb-2">
+                <span>05. TELEMETRY</span>
+                <i data-lucide="activity" class="w-3.5 h-3.5 text-amber-400"></i>
+              </div>
+              <div class="font-bold text-white text-sm">Kafka Event Bus &amp; OTel</div>
+              <div class="text-[11px] text-slate-400 mt-1">Zero-Drop Distributed Tracing</div>
+              <div class="text-amber-400 text-[10px] mt-2">Throughput: 500k eps</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Node Telemetry Inspector Panel (4 cols) -->
+        <div class="lg:col-span-4 bg-arch-card border border-arch-border rounded-2xl p-6 font-mono text-xs space-y-4" id="node-spec-panel">
+          <div class="border-b border-arch-border pb-3">
+            <span class="text-[10px] text-arch-muted uppercase tracking-wider">NODE SPECIFICATION</span>
+            <h3 class="text-lg font-bold text-white mt-1" id="spec-title">Edge Gateway (Envoy Ingress)</h3>
+          </div>
+
+          <div class="space-y-3 text-slate-300">
+            <div>
+              <span class="text-arch-muted block text-[11px]">PRIMARY ROLE</span>
+              <p id="spec-role" class="text-slate-200 mt-0.5">TLS termination, dynamic token bucket rate-limiting, and payload sanitization before internal network ingress.</p>
+            </div>
+            <div>
+              <span class="text-arch-muted block text-[11px]">TECH SELECTION</span>
+              <p id="spec-tech" class="text-amber-400 mt-0.5">Envoy Proxy, Go Control Plane, Redis Shards</p>
+            </div>
+            <div>
+              <span class="text-arch-muted block text-[11px]">KEY SLA METRIC</span>
+              <p id="spec-sla" class="text-emerald-400 mt-0.5">&lt; 1.8ms p99 latency at 35,000 req/sec</p>
+            </div>
+            <div>
+              <span class="text-arch-muted block text-[11px]">FAILURE MODE / SAFEGUARDS</span>
+              <p id="spec-failover" class="text-slate-400 text-[11px] mt-0.5">Automated circuit breaking to degradation mode, exponential backoff headers returned on upstream saturation.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Engineering Principles -->
+    <section id="principles" class="space-y-6">
+      <div class="border-b border-arch-border pb-4">
+        <span class="text-xs font-mono text-amber-400 tracking-wider uppercase">// CORE PHILOSOPHY</span>
+        <h2 class="text-3xl font-serif text-white mt-1">Architectural First Principles</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="space-y-3">
+          <span class="font-mono text-xs text-amber-400 font-bold">01 // OBSERVABILITY FIRST</span>
+          <h3 class="text-lg font-bold text-white">Uninstrumented code is technical debt.</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Every distributed service must expose standardized OpenTelemetry spans and structured metrics before touching staging. You cannot optimize or safeguard what you cannot measure.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <span class="font-mono text-xs text-amber-400 font-bold">02 // DETERMINISTIC BOUNDARIES</span>
+          <h3 class="text-lg font-bold text-white">Confine probabilistic outputs.</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            LLMs and generative models are stochastic by nature. Production systems must sandbox non-deterministic outputs inside strict schema validation, type checks, and isolated agent runners.
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <span class="font-mono text-xs text-amber-400 font-bold">03 // GRACEFUL DEGRADATION</span>
+          <h3 class="text-lg font-bold text-white">Fail small, recover instantaneously.</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Cascading failures kill platforms. We build multi-tiered fallbacks, stale-while-revalidate vector caches, and automated bulkhead isolation to guarantee core functionality stays up.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed RFC Case Studies -->
+    <section id="case-studies" class="space-y-8">
+      <div class="border-b border-arch-border pb-4">
+        <span class="text-xs font-mono text-amber-400 tracking-wider uppercase">// TECHNICAL DOSSIERS</span>
+        <h2 class="text-3xl font-serif text-white mt-1">Selected Systems Case Studies (RFCs)</h2>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Study 1 -->
+        <article class="p-8 rounded-2xl bg-arch-card border border-arch-border hover:border-amber-500/30 transition-all space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-arch-muted">
+            <span>RFC-042 // DISTRIBUTED RETRIEVAL</span>
+            <span class="text-amber-400">IMPACT: -48% LLM OVERHEAD</span>
+          </div>
+
+          <h3 class="text-2xl font-serif text-white">
+            Scaling Multi-Tenant Semantic Search Across 100M Document Vectors
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 text-xs">
+            <div>
+              <span class="font-mono text-slate-400 block mb-1 font-semibold uppercase">The Bottleneck</span>
+              <p class="text-slate-300 leading-relaxed">
+                Repetitive customer queries were repeatedly invoking $0.03/request frontier model inferences, generating severe tail latency (p99 &gt; 1,400ms) and ballooning monthly cloud bills.
+              </p>
+            </div>
+            <div>
+              <span class="font-mono text-slate-400 block mb-1 font-semibold uppercase">Architectural Solution</span>
+              <p class="text-slate-300 leading-relaxed">
+                Designed a 2-tier semantic cache proxy in Rust with SIMD-accelerated dot-product matching. Implemented scalar quantization to compress 1536-dim embeddings by 75% memory footprint.
+              </p>
+            </div>
+            <div>
+              <span class="font-mono text-slate-400 block mb-1 font-semibold uppercase">Empirical Results</span>
+              <p class="text-slate-300 leading-relaxed">
+                Achieved a 44.8% cache hit rate in production, cutting monthly LLM expenditure by $28,000 and dropping p99 response times down to 14ms.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <!-- Study 2 -->
+        <article class="p-8 rounded-2xl bg-arch-card border border-arch-border hover:border-amber-500/30 transition-all space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-arch-muted">
+            <span>RFC-038 // AGENT RUNTIMES</span>
+            <span class="text-sky-400">IMPACT: ZERO LOOP CRASHES</span>
+          </div>
+
+          <h3 class="text-2xl font-serif text-white">
+            Deterministic Checkpointing for Autonomous Multi-Agent Swarms
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 text-xs">
+            <div>
+              <span class="font-mono text-slate-400 block mb-1 font-semibold uppercase">The Challenge</span>
+              <p class="text-slate-300 leading-relaxed">
+                Autonomous code-writing and validation agents frequently suffered from circular reasoning deadlocks and unhandled step crashes during multi-hour execution pipelines.
+              </p>
+            </div>
+            <div>
+              <span class="font-mono text-slate-400 block mb-1 font-semibold uppercase">Architectural Solution</span>
+              <p class="text-slate-300 leading-relaxed">
+                Integrated Temporal state machines with LangGraph execution graphs. Implemented immutable step replay logs and deterministic loop breakers that kick off automatic human intervention flags.
+              </p>
+            </div>
+            <div>
+              <span class="font-mono text-slate-400 block mb-1 font-semibold uppercase">Empirical Results</span>
+              <p class="text-slate-300 leading-relaxed">
+                Handled 2.4M automated agent pipeline runs without a single unrecovered deadlock or lost intermediate context state.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Selected Publications & Whitepapers -->
+    <section id="publications" class="space-y-6">
+      <div class="border-b border-arch-border pb-4">
+        <span class="text-xs font-mono text-amber-400 tracking-wider uppercase">// WRITING &amp; PAPERS</span>
+        <h2 class="text-3xl font-serif text-white mt-1">Whitepapers &amp; Engineering Analyses</h2>
+      </div>
+
+      <div class="divide-y divide-arch-border font-mono text-xs">
+        <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-white/[0.02] px-2 rounded transition-all">
+          <div class="space-y-1">
+            <span class="text-white font-sans text-sm font-semibold block">Speculative Decoding and KV-Cache Compression in Production</span>
+            <span class="text-arch-muted">Published on High-Performance Systems Journal • 14 min read</span>
+          </div>
+          <span class="text-amber-400 self-start sm:self-center">Read Paper &rarr;</span>
+        </div>
+
+        <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-white/[0.02] px-2 rounded transition-all">
+          <div class="space-y-1">
+            <span class="text-white font-sans text-sm font-semibold block">Why We Replaced Our Python Gateway with a 2,000-line Go Binary</span>
+            <span class="text-arch-muted">Systems Architecture Monograph • 8 min read</span>
+          </div>
+          <span class="text-amber-400 self-start sm:self-center">Read Paper &rarr;</span>
+        </div>
+
+        <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-white/[0.02] px-2 rounded transition-all">
+          <div class="space-y-1">
+            <span class="text-white font-sans text-sm font-semibold block">Fault Injection &amp; Chaos Engineering in Agentic Tool-Use Networks</span>
+            <span class="text-arch-muted">Distributed Reliability Conference • 18 min read</span>
+          </div>
+          <span class="text-amber-400 self-start sm:self-center">Read Paper &rarr;</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact & Engagement Section -->
+    <section id="contact" class="p-10 rounded-2xl bg-arch-card border border-arch-border space-y-6">
+      <div class="max-w-2xl space-y-3">
+        <span class="text-xs font-mono text-amber-400 uppercase tracking-widest">// CONSULTATION &amp; ROLES</span>
+        <h2 class="text-4xl font-serif text-white">Let's Discuss Complex Engineering.</h2>
+        <p class="text-sm text-slate-300 leading-relaxed font-light">
+          I am currently discussing Staff and Principal SDE roles with engineering teams building mission-critical distributed systems and generative infrastructure.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-4 pt-4 font-mono text-xs">
+        <a href="mailto:alex@systems-arch.dev" class="px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold transition-all">
+          alex@systems-arch.dev
+        </a>
+        <a href="#" class="px-5 py-3 rounded-lg border border-arch-border hover:border-slate-500 text-slate-300 transition-all">
+          Download Architectural CV [PDF]
+        </a>
+        <a href="#" class="px-5 py-3 rounded-lg border border-arch-border hover:border-slate-500 text-slate-300 transition-all">
+          GitHub Profile
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-arch-border py-8 text-center text-xs font-mono text-arch-muted">
+    SYS-ARCH // VOLUME 2026 // ALEX CHEN // ALL RIGHTS RESERVED
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    // Node selector data
+    const nodeData = {
+      gateway: {
+        title: "Edge Gateway (Envoy Ingress)",
+        role: "TLS termination, dynamic token bucket rate-limiting, and payload sanitization before internal network ingress.",
+        tech: "Envoy Proxy, Go Control Plane, Redis Shards",
+        sla: "< 1.8ms p99 latency at 35,000 req/sec",
+        failover: "Automated circuit breaking to degradation mode, exponential backoff headers returned on upstream saturation."
+      },
+      router: {
+        title: "Semantic Router & Intent Classifier",
+        role: "Evaluates semantic vector distance of incoming user prompts. Dispatches cached responses or routes to the optimal model size.",
+        tech: "Rust, FastEmbed, ONNX Runtime, Redis Vector",
+        sla: "< 4.5ms classification overhead",
+        failover: "Fallback to direct frontier model route if classifier confidence is below 0.82."
+      },
+      swarm: {
+        title: "Agent Swarm Mesh (Stateful)",
+        role: "Coordinates multi-step tool execution, subagent delegation, code testing sandbox, and iterative error recovery.",
+        tech: "Temporal.io, LangGraph, Python 3.12, Docker",
+        sla: "Zero state loss across worker restarts",
+        failover: "Deterministic step checkpointing with auto-resumption from last valid AST snapshot."
+      },
+      vector: {
+        title: "Qdrant / PgVector Shard Cluster",
+        role: "Stores 100M+ high-dimensional embeddings with cosine indexing and scalar quantization for low-memory footprint.",
+        tech: "Qdrant Cluster, pgvector, NVMe storage",
+        sla: "< 12ms p99 retrieval across 100M vectors",
+        failover: "Multi-AZ read replicas with automated leader election via Raft consensus."
+      },
+      stream: {
+        title: "Kafka Event Bus & OpenTelemetry",
+        role: "Ingests 500,000 telemetry & audit log events/second for real-time anomaly detection and distributed tracing.",
+        tech: "Apache Kafka, ClickHouse, Grafana, OpenTelemetry",
+        sla: "99.999% message delivery guarantee",
+        failover: "Triple replication factor with ISR (in-sync replica) threshold >= 2."
+      }
+    };
+
+    function selectNode(nodeKey) {
+      // Remove active from all nodes
+      const allNodes = ['gateway', 'router', 'swarm', 'vector', 'stream'];
+      allNodes.forEach(k => {
+        const el = document.getElementById(`node-${k}`);
+        if (el) el.classList.remove('node-active');
+      });
+
+      // Add to selected
+      const current = document.getElementById(`node-${nodeKey}`);
+      if (current) current.classList.add('node-active');
+
+      // Update panel
+      const data = nodeData[nodeKey];
+      if (data) {
+        document.getElementById('spec-title').textContent = data.title;
+        document.getElementById('spec-role').textContent = data.role;
+        document.getElementById('spec-tech').textContent = data.tech;
+        document.getElementById('spec-sla').textContent = data.sla;
+        document.getElementById('spec-failover').textContent = data.failover;
+      }
+    }
+  </script>
+</body>
+</html>

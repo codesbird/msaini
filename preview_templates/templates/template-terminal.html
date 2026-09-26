@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDE Portfolio // Agentic Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            term: {
+              bg: '#090a0f',
+              card: '#0f111a',
+              border: '#1b1f2e',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'scanline': 'scanline 8s linear infinite',
+          },
+          keyframes: {
+            scanline: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(1000%)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #08090d;
+      color: #e2e8f0;
+      font-family: 'Space Grotesk', sans-serif;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.3);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3);
+    }
+    .code-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .code-scroll::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top System Telemetry Bar -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-term-bg/85 border-b border-term-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between font-mono text-xs">
+      <div class="flex items-center space-x-3">
+        <span class="flex h-2.5 w-2.5 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <span class="font-bold text-white tracking-wider">DEV_AGENT::v4.2</span>
+        <span class="hidden sm:inline text-slate-500">|</span>
+        <span class="hidden sm:inline text-slate-400">STATUS: <span class="text-emerald-400 font-semibold">AVAILABLE_FOR_HIRE</span></span>
+      </div>
+
+      <div class="hidden md:flex items-center space-x-6 text-slate-400">
+        <div>LATENCY: <span class="text-cyan-400 font-mono">14ms</span></div>
+        <div>REGION: <span class="text-purple-400 font-mono">US-EAST</span></div>
+        <div>TOKENS/SEC: <span class="text-amber-400 font-mono">142.8</span></div>
+      </div>
+
+      <nav class="flex items-center space-x-4">
+        <a href="#about" class="text-slate-400 hover:text-cyan-400 transition-colors">01.ABOUT</a>
+        <a href="#projects" class="text-slate-400 hover:text-cyan-400 transition-colors">02.PROJECTS</a>
+        <a href="#agent-chat" class="text-slate-400 hover:text-emerald-400 transition-colors">03.AI_AGENT</a>
+        <a href="#terminal" class="bg-cyan-950/60 text-cyan-400 border border-cyan-800/80 px-2.5 py-1 rounded hover:bg-cyan-900/60 transition-all font-semibold">CLI</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+    <!-- Hero Section -->
+    <section id="about" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-4">
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 font-mono text-xs">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>FULL-STACK SDE &amp; AI SYSTEMS ARCHITECT</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+          Architecting <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-300">Intelligent Systems</span> &amp; Resilient Infrastructure.
+        </h1>
+
+        <p class="text-lg text-slate-400 max-w-2xl leading-relaxed">
+          I build high-throughput distributed backends, autonomous multi-agent pipelines, and low-latency inference proxies. Bridging traditional software engineering rigor with frontier generative AI.
+        </p>
+
+        <!-- Command Prompt Quick Action -->
+        <div class="p-3 bg-term-card border border-term-border rounded-xl font-mono text-xs text-slate-300 flex items-center justify-between">
+          <div class="flex items-center space-x-2 truncate">
+            <span class="text-cyan-400 font-bold">$</span>
+            <span class="text-emerald-400">npx</span>
+            <span class="text-slate-200">alex-dev --connect --role=staff-sde</span>
+          </div>
+          <button onclick="navigator.clipboard.writeText('npx alex-dev --connect'); alert('Copied command!');" class="text-slate-400 hover:text-white px-2 py-1 bg-slate-800 rounded text-[11px] flex items-center gap-1">
+            <i data-lucide="copy" class="w-3 h-3"></i> Copy
+          </button>
+        </div>
+
+        <!-- Tech tags -->
+        <div class="flex flex-wrap gap-2 pt-2 font-mono text-xs">
+          <span class="px-2.5 py-1 rounded bg-slate-800/80 border border-slate-700/60 text-slate-300">Go / Rust</span>
+          <span class="px-2.5 py-1 rounded bg-slate-800/80 border border-slate-700/60 text-slate-300">Python / FastAPI</span>
+          <span class="px-2.5 py-1 rounded bg-slate-800/80 border border-slate-700/60 text-slate-300">TypeScript / Next.js</span>
+          <span class="px-2.5 py-1 rounded bg-cyan-950/60 border border-cyan-800/60 text-cyan-300">LangGraph / vLLM</span>
+          <span class="px-2.5 py-1 rounded bg-emerald-950/60 border border-emerald-800/60 text-emerald-300">Kubernetes / Kafka</span>
+          <span class="px-2.5 py-1 rounded bg-purple-950/60 border border-purple-800/60 text-purple-300">PgVector / Qdrant</span>
+        </div>
+
+        <div class="flex items-center space-x-4 pt-4">
+          <a href="#agent-chat" class="px-5 py-2.5 rounded-lg bg-emerald-500 text-black font-semibold text-sm hover:bg-emerald-400 transition-all flex items-center gap-2 glow-emerald">
+            <i data-lucide="bot" class="w-4 h-4"></i> Query My Digital Agent
+          </a>
+          <a href="#projects" class="px-5 py-2.5 rounded-lg bg-slate-800/90 text-white font-semibold text-sm hover:bg-slate-700 transition-all border border-slate-700 flex items-center gap-2">
+            <i data-lucide="folder-git-2" class="w-4 h-4"></i> View Systems (3)
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive CLI Emulator -->
+      <div class="lg:col-span-5">
+        <div id="terminal" class="bg-term-card border border-term-border rounded-2xl overflow-hidden shadow-2xl">
+          <!-- Terminal Header -->
+          <div class="bg-slate-900/90 px-4 py-3 border-b border-term-border flex items-center justify-between font-mono text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              <span class="text-slate-400 ml-2 font-mono">bash — session_id: 0x7f4b</span>
+            </div>
+            <span class="text-emerald-400 text-[11px] font-semibold">● ACTIVE</span>
+          </div>
+
+          <!-- Terminal Screen -->
+          <div class="p-4 font-mono text-xs space-y-3 min-h-[320px] max-h-[380px] overflow-y-auto code-scroll" id="term-output">
+            <div class="text-slate-400">Welcome to DevAgent Terminal v4.2.0. Type <span class="text-cyan-400 font-bold">help</span> to list commands.</div>
+            <div>
+              <span class="text-emerald-400">visitor@portfolio</span>:<span class="text-cyan-400">~</span>$ <span class="text-white">whoami</span>
+              <p class="text-slate-300 mt-1 pl-4 border-l border-cyan-500/40">
+                Staff-level Full Stack SDE. 6+ years designing real-time distributed platforms, agentic LLM workflows, and microservice meshes.
+              </p>
+            </div>
+            <div>
+              <span class="text-emerald-400">visitor@portfolio</span>:<span class="text-cyan-400">~</span>$ <span class="text-white">skills --summary</span>
+              <p class="text-slate-300 mt-1 pl-4 border-l border-emerald-500/40">
+                Core: Distributed Systems, High-Concurrency APIs, RAG Architectures, Event Streaming (Kafka), Kubernetes, Next.js.
+              </p>
+            </div>
+          </div>
+
+          <!-- Quick Command Chips & Input -->
+          <div class="p-3 bg-slate-900/60 border-t border-term-border space-y-2">
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono">
+              <span class="text-slate-500 mr-1 text-[10px] self-center">Try:</span>
+              <button onclick="runCommand('projects')" class="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 hover:bg-slate-700">projects</button>
+              <button onclick="runCommand('benchmarks')" class="px-2 py-0.5 rounded bg-slate-800 text-emerald-300 hover:bg-slate-700">benchmarks</button>
+              <button onclick="runCommand('contact')" class="px-2 py-0.5 rounded bg-slate-800 text-amber-300 hover:bg-slate-700">contact</button>
+              <button onclick="runCommand('clear')" class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:bg-slate-700">clear</button>
+            </div>
+            <form onsubmit="handleCliSubmit(event)" class="flex items-center space-x-2 font-mono text-xs">
+              <span class="text-cyan-400 font-bold">&gt;</span>
+              <input type="text" id="cli-input" placeholder="Type a command (e.g. 'help', 'projects')..." class="w-full bg-transparent border-0 outline-none text-white placeholder-slate-500">
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Metrics Telemetry Grid -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-5 rounded-xl bg-term-card border border-term-border space-y-1">
+        <div class="text-xs font-mono text-slate-400 flex items-center justify-between">
+          <span>THROUGHPUT</span>
+          <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+        </div>
+        <div class="text-3xl font-bold font-mono text-white">45,000+</div>
+        <div class="text-xs text-emerald-400 font-mono">RPS at Peak Production</div>
+      </div>
+
+      <div class="p-5 rounded-xl bg-term-card border border-term-border space-y-1">
+        <div class="text-xs font-mono text-slate-400 flex items-center justify-between">
+          <span>AI AGENT RUNS</span>
+          <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
+        </div>
+        <div class="text-3xl font-bold font-mono text-white">2.4M</div>
+        <div class="text-xs text-cyan-400 font-mono">Autonomous steps completed</div>
+      </div>
+
+      <div class="p-5 rounded-xl bg-term-card border border-term-border space-y-1">
+        <div class="text-xs font-mono text-slate-400 flex items-center justify-between">
+          <span>AVG LATENCY</span>
+          <i data-lucide="gauge" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div class="text-3xl font-bold font-mono text-white">18.4ms</div>
+        <div class="text-xs text-slate-400 font-mono">p99 across edge endpoints</div>
+      </div>
+
+      <div class="p-5 rounded-xl bg-term-card border border-term-border space-y-1">
+        <div class="text-xs font-mono text-slate-400 flex items-center justify-between">
+          <span>EXPERIENCE</span>
+          <i data-lucide="terminal" class="w-4 h-4 text-purple-400"></i>
+        </div>
+        <div class="text-3xl font-bold font-mono text-white">6+ YRS</div>
+        <div class="text-xs text-purple-400 font-mono">Scale-up to enterprise</div>
+      </div>
+    </section>
+
+    <!-- AI Agent Interactive Chat Box -->
+    <section id="agent-chat" class="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-term-card to-slate-900 border border-cyan-500/30 glow-cyan">
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="p-2 rounded-lg bg-cyan-950 border border-cyan-500/40 text-cyan-400">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white font-mono flex items-center gap-2">
+                Ask My Digital Twin (LLM Proxy)
+                <span class="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">SIMULATED</span>
+              </h2>
+              <p class="text-xs text-slate-400">Trained on my career history, tech architecture choices, and availability.</p>
+            </div>
+          </div>
+          <span class="hidden sm:inline-flex items-center text-xs font-mono text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded border border-emerald-800/40">
+            ● Context: Ready
+          </span>
+        </div>
+
+        <!-- Chat Conversation Area -->
+        <div id="ai-chat-thread" class="bg-black/50 border border-slate-800 rounded-xl p-4 min-h-[180px] max-h-[260px] overflow-y-auto space-y-3 font-mono text-xs code-scroll">
+          <div class="flex items-start space-x-2 text-cyan-300">
+            <span class="font-bold">[AI Agent]:</span>
+            <p class="text-slate-300">
+              Hello! I'm the automated representation of the engineer. Ask me anything about system designs, previous roles, tech stack preferences, or interview availability.
+            </p>
+          </div>
+        </div>
+
+        <!-- Pre-set prompt chips -->
+        <div class="flex flex-wrap gap-2 text-xs font-mono">
+          <button onclick="askPreset('What is your architecture experience with AI agents?')" class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-all text-left">
+            💡 "What is your architecture experience with AI agents?"
+          </button>
+          <button onclick="askPreset('What backend stack do you rely on for scale?')" class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-all text-left">
+            ⚡ "What backend stack do you rely on for scale?"
+          </button>
+          <button onclick="askPreset('Are you open to Senior / Lead SDE roles?')" class="px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition-all text-left">
+            🎯 "Are you open to Senior / Lead SDE roles?"
+          </button>
+        </div>
+
+        <!-- Input Bar -->
+        <form onsubmit="handleAgentChat(event)" class="flex items-center space-x-2">
+          <input type="text" id="agent-input" placeholder="Ask about distributed systems, microservices, AI pipelines..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono">
+          <button type="submit" class="px-4 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-all flex items-center gap-1 font-mono">
+            <span>SEND</span>
+            <i data-lucide="corner-down-left" class="w-3.5 h-3.5"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Featured Projects Grid -->
+    <section id="projects" class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-white font-mono flex items-center gap-2">
+            <span class="text-cyan-400">// 02</span> SYSTEM_SHOWCASE
+          </h2>
+          <p class="text-sm text-slate-400">Production services, AI pipelines, and high-performance tools.</p>
+        </div>
+        <a href="https://github.com" target="_blank" class="text-xs font-mono text-cyan-400 hover:underline flex items-center gap-1">
+          github.com/profile <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Project 1 -->
+        <div class="p-6 rounded-xl bg-term-card border border-term-border hover:border-cyan-500/50 transition-all group flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">● ACTIVE IN PROD</span>
+              <span class="text-slate-500">v2.4.0</span>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
+              NeuroMesh: Distributed Vector Cache
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Tier-1 semantic caching and vector indexing proxy built in Rust &amp; gRPC. Reduces repetitive LLM inferencing costs by 48% while maintaining sub-15ms lookup speeds across 100M+ embeddings.
+            </p>
+            <div class="flex flex-wrap gap-1.5 font-mono text-[11px] pt-2">
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Rust</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Qdrant</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">gRPC</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Docker</span>
+            </div>
+          </div>
+          <div class="pt-6 border-t border-slate-800/80 mt-6 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">P99: <span class="text-cyan-400">12ms</span></span>
+            <a href="#" class="text-cyan-400 hover:text-white flex items-center gap-1">Repo &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Project 2 -->
+        <div class="p-6 rounded-xl bg-term-card border border-term-border hover:border-emerald-500/50 transition-all group flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">★ FEATURED</span>
+              <span class="text-slate-500">v1.1.2</span>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">
+              AgentMesh: Multi-Agent Orchestrator
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Autonomous orchestration runtime coordinating code inspection, lint auto-fixing, and test generation agents. Employs stateful checkpoints, fallback retry graphs, and human-in-the-loop approvals.
+            </p>
+            <div class="flex flex-wrap gap-1.5 font-mono text-[11px] pt-2">
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Python</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Temporal</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">LangGraph</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">FastAPI</span>
+            </div>
+          </div>
+          <div class="pt-6 border-t border-slate-800/80 mt-6 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Agents: <span class="text-emerald-400">12 Swarms</span></span>
+            <a href="#" class="text-emerald-400 hover:text-white flex items-center gap-1">Docs &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Project 3 -->
+        <div class="p-6 rounded-xl bg-term-card border border-term-border hover:border-purple-500/50 transition-all group flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">OPEN SOURCE</span>
+              <span class="text-slate-500">1.8k stars</span>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-purple-300 transition-colors">
+              StreamPulse: High-Volume Event Bus
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Fault-tolerant event stream processor managing 500k telemetry events per second. Integrated with real-time alerting engines, anomaly detection models, and Grafana dashboard pipelines.
+            </p>
+            <div class="flex flex-wrap gap-1.5 font-mono text-[11px] pt-2">
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Go</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Apache Kafka</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">ClickHouse</span>
+              <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Next.js</span>
+            </div>
+          </div>
+          <div class="pt-6 border-t border-slate-800/80 mt-6 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Throughput: <span class="text-purple-400">500k/s</span></span>
+            <a href="#" class="text-purple-400 hover:text-white flex items-center gap-1">Live Demo &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact & Terminal Footer -->
+    <footer class="pt-12 border-t border-term-border text-center space-y-4 font-mono text-xs text-slate-500 pb-16">
+      <div class="flex items-center justify-center space-x-6 text-slate-400">
+        <a href="#" class="hover:text-cyan-400 transition-colors">GITHUB</a>
+        <a href="#" class="hover:text-cyan-400 transition-colors">LINKEDIN</a>
+        <a href="#" class="hover:text-cyan-400 transition-colors">TWITTER/X</a>
+        <a href="#" class="hover:text-cyan-400 transition-colors">RESUME.PDF</a>
+      </div>
+      <div>Designed for modern AI-native SDE portfolios. Fully responsive &amp; modular.</div>
+    </footer>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    // Terminal interactive commands
+    const termOutput = document.getElementById('term-output');
+    const cliInput = document.getElementById('cli-input');
+
+    const commands = {
+      help: "Available commands:\\n- whoami       : Summary of profile & focus\\n- skills       : Core tech stack & distributed systems experience\\n- projects     : Highlighted production deployments\\n- benchmarks   : Performance metrics & latency p99 data\\n- contact      : Email, LinkedIn, and hiring channels\\n- clear        : Wipe the terminal buffer",
+      whoami: "Alex Chen // Senior Software Development Engineer (SDE III).\\nFocus: Scalable Backends, Distributed Cache Systems, and Multi-Agent GenAI Architectures.",
+      skills: "[LANGUAGES] Go, Rust, Python, TypeScript, SQL, C++\\n[SYSTEMS] Kafka, Kubernetes, Redis, Docker, gRPC, PostgreSQL\\n[AI/ML] LangGraph, vLLM, Qdrant, PyTorch, Semantic Caching",
+      projects: "[1] NeuroMesh: Distributed Vector Cache (Rust + gRPC)\\n[2] AgentMesh: Multi-Agent Orchestration Platform (Temporal + Python)\\n[3] StreamPulse: 500k evt/sec Telemetry Pipeline (Go + Kafka)",
+      benchmarks: "[Bench_01] Latency: 12ms p99 on 100M Vector lookups\\n[Bench_02] Throughput: 45k RPS sustainable on 4x nodes\\n[Bench_03] Cost Reduction: 48% lower token overhead with semantic cache",
+      contact: "Email: alex.sde.engineer@domain.com\\nLinkedIn: linkedin.com/in/alex-sde\\nGitHub: github.com/alex-sde"
+    };
+
+    function appendTerminal(cmd, text) {
+      const row = document.createElement('div');
+      row.className = "space-y-1";
+      row.innerHTML = `
+        <div><span class="text-emerald-400">visitor@portfolio</span>:<span class="text-cyan-400">~</span>$ <span class="text-white">${cmd}</span></div>
+        <p class="text-slate-300 pl-4 border-l border-cyan-500/40 whitespace-pre-line">${text}</p>
+      `;
+      termOutput.appendChild(row);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    function runCommand(cmd) {
+      if (cmd === 'clear') {
+        termOutput.innerHTML = '';
+        return;
+      }
+      const response = commands[cmd] || `command not found: ${cmd}. Type 'help' for instructions.`;
+      appendTerminal(cmd, response);
+    }
+
+    function handleCliSubmit(e) {
+      e.preventDefault();
+      const val = cliInput.value.trim().toLowerCase();
+      if (!val) return;
+      runCommand(val);
+      cliInput.value = '';
+    }
+
+    // AI Digital Twin Chat simulator
+    const aiChatThread = document.getElementById('ai-chat-thread');
+    const agentInput = document.getElementById('agent-input');
+
+    const agentKnowledge = {
+      "What is your architecture experience with AI agents?": "I've designed autonomous multi-agent pipelines using LangGraph, Temporal, and custom state machines. The architecture relies on deterministic checkpointers, automated retry policies, and semantic validation guardrails to prevent agent hallucination loops in production.",
+      "What backend stack do you rely on for scale?": "For high throughput and compute-bound workloads, I primarily build microservices in Go or Rust with gRPC and Redis/Kafka. For rapid orchestration and ML interfaces, FastAPI + Asyncio in Python provides the best DX and library compatibility.",
+      "Are you open to Senior / Lead SDE roles?": "Yes! I am actively looking for Senior / Lead / Staff SDE opportunities focused on core infrastructure, distributed backend systems, or generative AI platform engineering."
+    };
+
+    function askPreset(promptText) {
+      addUserAndAgentMessage(promptText, agentKnowledge[promptText]);
+    }
+
+    function handleAgentChat(e) {
+      e.preventDefault();
+      const query = agentInput.value.trim();
+      if (!query) return;
+
+      let answer = "Thanks for asking! As an SDE, I focus on clean microservice architecture, low latency, and robust observability. Let's schedule a call or grab coffee to dive deeper into our engineering synergy.";
+      for (const [key, val] of Object.entries(agentKnowledge)) {
+        if (query.toLowerCase().includes(key.toLowerCase().substring(0, 15))) {
+          answer = val;
+          break;
+        }
+      }
+
+      addUserAndAgentMessage(query, answer);
+      agentInput.value = '';
+    }
+
+    function addUserAndAgentMessage(userText, agentText) {
+      // User message
+      const userBubble = document.createElement('div');
+      userBubble.className = "flex items-start justify-end space-x-2 text-right";
+      userBubble.innerHTML = `
+        <div class="bg-cyan-950/60 border border-cyan-800 text-cyan-200 px-3 py-1.5 rounded-lg max-w-[85%] text-left">
+          ${userText}
+        </div>
+      `;
+      aiChatThread.appendChild(userBubble);
+
+      // Typing simulation
+      setTimeout(() => {
+        const agentBubble = document.createElement('div');
+        agentBubble.className = "flex items-start space-x-2 text-slate-300";
+        agentBubble.innerHTML = `
+          <span class="font-bold text-cyan-400">[AI Agent]:</span>
+          <p class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg max-w-[85%] leading-relaxed">
+            ${agentText}
+          </p>
+        `;
+        aiChatThread.appendChild(agentBubble);
+        aiChatThread.scrollTop = aiChatThread.scrollHeight;
+      }, 350);
+
+      aiChatThread.scrollTop = aiChatThread.scrollHeight;
+    }
+  </script>
+</body>
+</html>
