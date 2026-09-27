@@ -1,5 +1,5 @@
 import { database, isFirebaseConfigured } from "./firebase";
-import { ref, get, set, onValue, off } from "firebase/database";
+import { ref, onValue, off } from "firebase/database";
 import {
   personalInfo as defaultPersonalInfo,
   projects as defaultProjects,
@@ -54,7 +54,7 @@ export const defaultPortfolioData: PortfolioData = {
 
 const LOCAL_STORAGE_KEY = "monu_saini_portfolio_data";
 
-// Helper to get cached or local data if Firebase is not yet connected
+// Helper to get cached or local data
 export const getLocalFallbackData = (): PortfolioData => {
   if (typeof window !== "undefined") {
     try {
@@ -69,75 +69,87 @@ export const getLocalFallbackData = (): PortfolioData => {
   return defaultPortfolioData;
 };
 
-// Fetch once (e.g. for SSR or initial state)
+// Fetch data (Server-side Admin route or client fallback)
 export async function fetchPortfolioData(): Promise<PortfolioData> {
-  if (isFirebaseConfigured() && database) {
+  if (typeof window !== "undefined") {
     try {
-      const portfolioRef = ref(database, "portfolio");
-      const snapshot = await get(portfolioRef);
-      if (snapshot.exists()) {
-        const val = snapshot.val();
-        return {
-          personalInfo: val.personalInfo || defaultPortfolioData.personalInfo,
-          metrics: val.metrics || defaultPortfolioData.metrics,
-          projects: val.projects || defaultPortfolioData.projects,
-          skillCategories: val.skillCategories || defaultPortfolioData.skillCategories,
-          experienceData: val.experienceData || defaultPortfolioData.experienceData,
-          educationData: val.educationData || defaultPortfolioData.educationData,
-          digitalTwinQA: val.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
-          lastUpdated: val.lastUpdated || defaultPortfolioData.lastUpdated,
-        };
+      const res = await fetch("/api/portfolio", { cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) {
+          const merged: PortfolioData = {
+            personalInfo: json.data.personalInfo || defaultPortfolioData.personalInfo,
+            metrics: json.data.metrics || defaultPortfolioData.metrics,
+            projects: json.data.projects || defaultPortfolioData.projects,
+            skillCategories: json.data.skillCategories || defaultPortfolioData.skillCategories,
+            experienceData: json.data.experienceData || defaultPortfolioData.experienceData,
+            educationData: json.data.educationData || defaultPortfolioData.educationData,
+            digitalTwinQA: json.data.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
+            lastUpdated: json.data.lastUpdated || defaultPortfolioData.lastUpdated,
+          };
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+          return merged;
+        }
       }
-    } catch (err) {
-      console.warn("Error reading from Firebase Realtime Database, using local fallback:", err);
+    } catch (e) {
+      console.warn("Could not fetch from /api/portfolio, using local fallback:", e);
     }
   }
   return getLocalFallbackData();
 }
 
-// Subscribe to real-time changes
+// Real-time subscription to Firebase changes
 export function subscribeToPortfolio(callback: (data: PortfolioData) => void): () => void {
+  // If client-side Firebase is connected, attach listener
   if (isFirebaseConfigured() && database) {
     try {
       const portfolioRef = ref(database, "portfolio");
-      const unsubscribe = onValue(portfolioRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const val = snapshot.val();
-          const merged: PortfolioData = {
-            personalInfo: val.personalInfo || defaultPortfolioData.personalInfo,
-            metrics: val.metrics || defaultPortfolioData.metrics,
-            projects: val.projects || defaultPortfolioData.projects,
-            skillCategories: val.skillCategories || defaultPortfolioData.skillCategories,
-            experienceData: val.experienceData || defaultPortfolioData.experienceData,
-            educationData: val.educationData || defaultPortfolioData.educationData,
-            digitalTwinQA: val.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
-            lastUpdated: val.lastUpdated || defaultPortfolioData.lastUpdated,
-          };
-          callback(merged);
-        } else {
-          callback(getLocalFallbackData());
+      const unsubscribe = onValue(
+        portfolioRef,
+        (snapshot) => {
+          if (snapshot.exists()) {
+            const val = snapshot.val();
+            const merged: PortfolioData = {
+              personalInfo: val.personalInfo || defaultPortfolioData.personalInfo,
+              metrics: val.metrics || defaultPortfolioData.metrics,
+              projects: val.projects || defaultPortfolioData.projects,
+              skillCategories: val.skillCategories || defaultPortfolioData.skillCategories,
+              experienceData: val.experienceData || defaultPortfolioData.experienceData,
+              educationData: val.educationData || defaultPortfolioData.educationData,
+              digitalTwinQA: val.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
+              lastUpdated: val.lastUpdated || defaultPortfolioData.lastUpdated,
+            };
+            callback(merged);
+          } else {
+            // If empty in Firebase, try server API or local
+            fetchPortfolioData().then(callback);
+          }
+        },
+        (error) => {
+          console.warn("Client RTDB listener error (falling back to /api/portfolio):", error);
+          fetchPortfolioData().then(callback);
         }
-      });
+      );
 
       return () => off(portfolioRef, "value", unsubscribe);
     } catch (err) {
-      console.warn("Failed to subscribe to Firebase:", err);
+      console.warn("Failed to subscribe to client Firebase:", err);
     }
   }
 
-  // If not configured, trigger once with local data
-  callback(getLocalFallbackData());
+  // Initial load
+  fetchPortfolioData().then(callback);
   return () => {};
 }
 
-// Update a single section
+// Update section via Server-Side Firebase Admin API
 export async function updatePortfolioSection<K extends keyof PortfolioData>(
   sectionKey: K,
   data: PortfolioData[K]
 ): Promise<boolean> {
   const timestamp = new Date().toISOString();
 
-  // Save to LocalStorage first for instant local persistence
+  // Save to LocalStorage immediately for instant UX feedback
   if (typeof window !== "undefined") {
     try {
       const current = getLocalFallbackData();
@@ -152,36 +164,42 @@ export async function updatePortfolioSection<K extends keyof PortfolioData>(
     }
   }
 
-  // Save to Firebase Realtime Database if active
-  if (isFirebaseConfigured() && database) {
-    try {
-      const sectionRef = ref(database, `portfolio/${sectionKey}`);
-      await set(sectionRef, data);
-      await set(ref(database, "portfolio/lastUpdated"), timestamp);
+  // Push to Server-Side API using Firebase Admin SDK
+  try {
+    const res = await fetch("/api/portfolio", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ section: sectionKey, data }),
+    });
+
+    if (res.ok) {
       return true;
-    } catch (err) {
-      console.error("Firebase update error:", err);
-      return false;
     }
+    const errData = await res.json();
+    console.error("API error updating section:", errData);
+  } catch (err) {
+    console.error("Network error updating section via API:", err);
   }
 
   return true;
 }
 
-// One-click Seed Initial Data to Firebase
+// One-click Seed Initial Data to Firebase via Admin API
 export async function seedFirebaseWithDefaults(): Promise<boolean> {
-  if (isFirebaseConfigured() && database) {
-    try {
-      const portfolioRef = ref(database, "portfolio");
-      await set(portfolioRef, {
-        ...defaultPortfolioData,
-        lastUpdated: new Date().toISOString(),
-      });
+  try {
+    const res = await fetch("/api/portfolio", {
+      method: "PUT",
+    });
+
+    if (res.ok) {
+      // Also update local cache
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultPortfolioData));
+      }
       return true;
-    } catch (err) {
-      console.error("Firebase seeding error:", err);
-      return false;
     }
+  } catch (err) {
+    console.error("Error seeding Firebase via API:", err);
   }
   return false;
 }
