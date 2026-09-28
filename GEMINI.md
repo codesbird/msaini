@@ -16,6 +16,9 @@
   - Phone: `+91 8696807790`
   - LinkedIn: `https://www.linkedin.com/in/monupydev` (2,900+ followers)
   - GitHub: `https://github.com/tech2saini`
+- **Git Commit Identity**:
+  - Name: `codesbird`
+  - Email: `hackingkali789@gmail.com`
 
 ---
 
@@ -24,8 +27,12 @@
 - **Framework**: **Next.js 15 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS**.
 - **Header Preference**: **No latency indicator** in the telemetry header (keep clean `REGION: IN-NORTH` and `UPTIME: 99.98%` only).
 - **Data Source**: Decoupled single source of truth in [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts) with real-time cloud synchronization via **Firebase Realtime Database** (`src/lib/firebase.ts` & `src/lib/portfolio-service.ts`).
+- **Firebase Realtime Database Setup**:
+  - Database URL: `https://portfolio-35cfd-default-rtdb.asia-southeast1.firebasedatabase.app` (Singapore / `asia-southeast1`)
+  - Admin SDK Integration: [`src/lib/firebase-admin.ts`](./src/lib/firebase-admin.ts) using modular imports from `firebase-admin/app` & `firebase-admin/database` with automatic newline formatting for `FIREBASE_PRIVATE_KEY`.
+  - API Controller: [`src/app/api/portfolio/route.ts`](./src/app/api/portfolio/route.ts) with `GET` (fetch data), `POST` (update section), and `PUT` (one-click default data seeding).
 - **Dynamic Admin Dashboard**: Accessible at `/admin` (passphrase protected: default `monu2026`) allowing live edits to Hero, Metrics, Projects, Skills, Timeline, and Digital Twin QA.
-- **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets.
+- **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets, with local base64 fallback.
 - **AI Agent API**: Next.js App Router Route Handler at [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with intelligent semantic response synthesis.
 
 ---
