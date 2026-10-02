@@ -19,7 +19,7 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
-          <Link href="#about" className="font-bold text-white tracking-wider hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+          <Link href="/" className="font-bold text-white tracking-wider hover:text-cyan-400 transition-colors flex items-center gap-1.5">
             <Terminal className="w-3.5 h-3.5 text-cyan-400" />
             <span>DEV_AGENT::{info.handle.toUpperCase()}</span>
           </Link>
@@ -41,24 +41,24 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
 
         {/* Right: Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-5">
-          <Link href="#about" className="text-slate-400 hover:text-cyan-400 transition-colors">
+          <Link href="/about" className="text-slate-400 hover:text-cyan-400 transition-colors">
             01.ABOUT
           </Link>
-          <Link href="#projects" className="text-slate-400 hover:text-cyan-400 transition-colors">
+          <Link href="/#projects" className="text-slate-400 hover:text-cyan-400 transition-colors">
             02.PROJECTS
           </Link>
-          <Link href="#skills" className="text-slate-400 hover:text-cyan-400 transition-colors">
+          <Link href="/#skills" className="text-slate-400 hover:text-cyan-400 transition-colors">
             03.SKILLS
           </Link>
-          <Link href="#experience" className="text-slate-400 hover:text-cyan-400 transition-colors">
+          <Link href="/#experience" className="text-slate-400 hover:text-cyan-400 transition-colors">
             04.TIMELINE
           </Link>
-          <Link href="#agent-chat" className="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1">
+          <Link href="/#agent-chat" className="text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             05.AI_AGENT
           </Link>
           <Link
-            href="#contact"
+            href="/#contact"
             className="bg-cyan-950/60 text-cyan-400 border border-cyan-800/80 px-2.5 py-1 rounded hover:bg-cyan-900/60 transition-all font-semibold"
           >
             HIRE_ME
@@ -82,7 +82,7 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
             <Shield className="w-3.5 h-3.5" />
           </Link>
           <Link
-            href="#contact"
+            href="/#contact"
             className="bg-cyan-950/60 text-cyan-400 border border-cyan-800/80 px-2 py-1 rounded text-[11px] font-semibold"
           >
             HIRE
@@ -102,42 +102,42 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
         <div className="lg:hidden bg-term-card/95 border-b border-term-border px-4 py-4 space-y-3 font-mono text-xs">
           <div className="text-slate-500 pb-1 border-b border-slate-800">REGION: IN-NORTH | UPTIME: 99.98%</div>
           <Link
-            href="#about"
+            href="/about"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-slate-300 hover:text-cyan-400 py-1"
           >
             01. ABOUT
           </Link>
           <Link
-            href="#projects"
+            href="/#projects"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-slate-300 hover:text-cyan-400 py-1"
           >
             02. PROJECTS
           </Link>
           <Link
-            href="#skills"
+            href="/#skills"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-slate-300 hover:text-cyan-400 py-1"
           >
             03. SKILLS
           </Link>
           <Link
-            href="#experience"
+            href="/#experience"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-slate-300 hover:text-cyan-400 py-1"
           >
             04. TIMELINE
           </Link>
           <Link
-            href="#agent-chat"
+            href="/#agent-chat"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-emerald-400 hover:text-emerald-300 py-1 font-semibold"
           >
             05. AI AGENT TWIN
           </Link>
           <Link
-            href="#contact"
+            href="/#contact"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-cyan-400 hover:text-cyan-300 py-1 font-semibold"
           >

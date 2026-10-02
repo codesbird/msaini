@@ -15,6 +15,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://monusaini.dev"),
   title: "Monu Saini // Python Developer & AI Automation Engineer",
   description:
     "Portfolio of Monu Saini — Python Developer, Automation Engineer, Data Engineering, and AI Backend SDE. Specializing in AI agent workflows, n8n, MCP, Django, Flask, and distributed APIs.",
