@@ -97,6 +97,17 @@ export interface SmtpConfig {
   enabled: boolean;
 }
 
+export interface AdminSecurityConfig {
+  email: string;
+  customPassword?: string;
+  mfaEnabled: boolean;
+  mfaSecret?: string;
+  mfaQrUrl?: string;
+  backupCodes: string[];
+  resetCode?: string;
+  resetCodeExpires?: number;
+}
+
 export interface PortfolioData {
   personalInfo: PersonalInfo;
   metrics: MetricItem[];
@@ -106,5 +117,6 @@ export interface PortfolioData {
   educationData: Education[];
   digitalTwinQA: DigitalTwinQA[];
   smtpConfig?: SmtpConfig;
+  securityConfig?: AdminSecurityConfig;
   lastUpdated?: string;
 }

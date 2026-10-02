@@ -8,7 +8,7 @@ import {
   seedFirebaseWithDefaults,
   defaultPortfolioData,
 } from "@/lib/portfolio-service";
-import { defaultSmtpConfig } from "@/data/portfolio-data";
+import { defaultSmtpConfig, defaultSecurityConfig } from "@/data/portfolio-data";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import {
   PortfolioData,
@@ -19,6 +19,7 @@ import {
   DigitalTwinQA,
   MetricItem,
   SmtpConfig,
+  AdminSecurityConfig,
 } from "@/types/portfolio";
 import { FileUpload } from "@/components/admin/FileUpload";
 import {
@@ -48,17 +49,57 @@ import {
   Menu,
   X,
   ChevronRight,
+  ShieldCheck,
+  Key,
+  QrCode,
+  Lock,
+  Smartphone,
+  Copy,
+  Check,
+  ArrowLeft,
 } from "lucide-react";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passInput, setPassInput] = useState("");
-  const [authError, setAuthError] = useState(false);
-
   const [activeTab, setActiveTab] = useState<
-    "profile" | "metrics" | "projects" | "skills" | "timeline" | "ai" | "smtp"
+    "profile" | "metrics" | "projects" | "skills" | "timeline" | "ai" | "smtp" | "security"
   >("profile");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Authentication State
+  const [loginMode, setLoginMode] = useState<"login" | "forgot">("login");
+  const [loginStep, setLoginStep] = useState<"credentials" | "mfa">("credentials");
+  const [emailInput, setEmailInput] = useState("");
+  const [passInput, setPassInput] = useState("");
+  const [mfaCodeInput, setMfaCodeInput] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Forgot Password Recovery State
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStep, setForgotStep] = useState<1 | 2>(1);
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [resetNewPass, setResetNewPass] = useState("");
+  const [resetConfirmPass, setResetConfirmPass] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotStatus, setForgotStatus] = useState<{ success: boolean; message: string; devCode?: string } | null>(null);
+
+  // Security Tab Edit State
+  const [currentPasswordInput, setCurrentPasswordInput] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [showUpdatePasswords, setShowUpdatePasswords] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [passwordUpdateStatus, setPasswordUpdateStatus] = useState<{ success: boolean; message: string } | null>(null);
+
+  // MFA Testing & Management in Tab 08
+  const [mfaTestToken, setMfaTestToken] = useState("");
+  const [mfaTesting, setMfaTesting] = useState(false);
+  const [mfaTestResult, setMfaTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [generatingMfa, setGeneratingMfa] = useState(false);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+  const [copiedBackup, setCopiedBackup] = useState(false);
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     server: true,
@@ -71,7 +112,6 @@ export default function AdminDashboard() {
     setOpenAccordions((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const [showPassword, setShowPassword] = useState(false);
   const [testingSmtp, setTestingSmtp] = useState(false);
   const [testResult, setTestResult] = useState<{
     success?: boolean;
@@ -142,24 +182,16 @@ export default function AdminDashboard() {
       statusDot: data.smtpConfig?.enabled ? "bg-emerald-400" : "bg-slate-500",
       icon: Mail,
     },
+    {
+      id: "security" as const,
+      num: "08",
+      label: "Security & MFA",
+      sub: data.securityConfig?.mfaEnabled ? "2FA Active (TOTP)" : "2FA Standby",
+      statusDot: data.securityConfig?.mfaEnabled ? "bg-emerald-400" : "bg-amber-400",
+      badge: data.securityConfig?.mfaEnabled ? "ON" : "OFF",
+      icon: ShieldCheck,
+    },
   ];
-
-  // Check auth session
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const auth = sessionStorage.getItem("admin_auth");
-      if (auth === "true") {
-        setIsAuthenticated(true);
-      }
-    }
-  }, []);
-
-  // Fetch portfolio data
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadData();
-    }
-  }, [isAuthenticated]);
 
   const loadData = async () => {
     setLoading(true);
@@ -168,22 +200,24 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passInput === adminPass) {
-      sessionStorage.setItem("admin_auth", "true");
-      setIsAuthenticated(true);
-      setAuthError(false);
-    } else {
-      setAuthError(true);
+  // Check auth session and load initial data on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const auth = sessionStorage.getItem("admin_auth");
+      if (auth === "true") {
+        setIsAuthenticated(true);
+      }
     }
-  };
+    loadData();
+  }, []);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("admin_auth");
-    setIsAuthenticated(false);
-    setPassInput("");
-  };
+  // Sync default emails when securityConfig is loaded
+  useEffect(() => {
+    if (data.securityConfig?.email) {
+      if (!emailInput) setEmailInput(data.securityConfig.email);
+      if (!forgotEmail) setForgotEmail(data.securityConfig.email);
+    }
+  }, [data.securityConfig?.email]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -246,11 +280,386 @@ export default function AdminDashboard() {
     }
   };
 
-  // Login Screen
+  // Handlers for Authentication & Security
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setAuthLoading(true);
+
+    const configuredEmail = (data.securityConfig?.email || "monusainideveloper@gmail.com").trim().toLowerCase();
+    const configuredPass = data.securityConfig?.customPassword || adminPass;
+
+    if (emailInput.trim().toLowerCase() !== configuredEmail) {
+      setAuthError(`Email "${emailInput}" does not match the registered administrator account.`);
+      setAuthLoading(false);
+      return;
+    }
+
+    if (passInput !== configuredPass) {
+      setAuthError("Incorrect password. Please verify your credentials or click 'Forgot Password'.");
+      setAuthLoading(false);
+      return;
+    }
+
+    // If 2FA (MFA) is enabled, advance to MFA step
+    if (data.securityConfig?.mfaEnabled) {
+      setLoginStep("mfa");
+      setAuthLoading(false);
+      return;
+    }
+
+    // Direct login when MFA is not active
+    sessionStorage.setItem("admin_auth", "true");
+    setIsAuthenticated(true);
+    setAuthLoading(false);
+  };
+
+  const handleMfaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setAuthLoading(true);
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify-mfa",
+          token: mfaCodeInput.trim(),
+          secret: data.securityConfig?.mfaSecret,
+          backupCodes: data.securityConfig?.backupCodes || [],
+        }),
+      });
+
+      const resJson = await res.json();
+      if (res.ok && resJson.valid) {
+        // If an emergency backup code was used, remove it from list
+        if (resJson.isBackup && data.securityConfig?.backupCodes) {
+          const updatedCodes = data.securityConfig.backupCodes.filter(
+            (c) => c.toUpperCase() !== mfaCodeInput.trim().toUpperCase()
+          );
+          const updatedSec: AdminSecurityConfig = {
+            ...data.securityConfig,
+            backupCodes: updatedCodes,
+          };
+          setData((prev) => ({ ...prev, securityConfig: updatedSec }));
+          updatePortfolioSection("securityConfig", updatedSec);
+        }
+
+        sessionStorage.setItem("admin_auth", "true");
+        setIsAuthenticated(true);
+        setLoginStep("credentials");
+        setMfaCodeInput("");
+      } else {
+        setAuthError(resJson.error || "Invalid 6-digit verification code or backup code.");
+      }
+    } catch (err: any) {
+      setAuthError("Failed to verify MFA code: " + (err.message || String(err)));
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSendRecoveryCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotStatus(null);
+    setForgotLoading(true);
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "send-recovery-code",
+          email: forgotEmail.trim(),
+        }),
+      });
+
+      const resJson = await res.json();
+      if (res.ok && resJson.success) {
+        setForgotStatus({
+          success: true,
+          message: resJson.message,
+          devCode: resJson.devCode,
+        });
+        setForgotStep(2);
+      } else {
+        setForgotStatus({
+          success: false,
+          message: resJson.error || "Could not dispatch recovery code.",
+        });
+      }
+    } catch (err: any) {
+      setForgotStatus({
+        success: false,
+        message: err.message || "Network error sending recovery code.",
+      });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotStatus(null);
+
+    if (resetNewPass.length < 6) {
+      setForgotStatus({
+        success: false,
+        message: "New password must be at least 6 characters long.",
+      });
+      return;
+    }
+
+    if (resetNewPass !== resetConfirmPass) {
+      setForgotStatus({
+        success: false,
+        message: "Passwords do not match.",
+      });
+      return;
+    }
+
+    setForgotLoading(true);
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reset-password",
+          email: forgotEmail.trim(),
+          resetCode: recoveryCode.trim(),
+          newPassword: resetNewPass,
+        }),
+      });
+
+      const resJson = await res.json();
+      if (res.ok && resJson.success) {
+        const updatedSec: AdminSecurityConfig = {
+          ...(data.securityConfig || defaultSecurityConfig),
+          customPassword: resetNewPass,
+        };
+        setData((prev) => ({ ...prev, securityConfig: updatedSec }));
+        updatePortfolioSection("securityConfig", updatedSec);
+
+        setForgotStatus({
+          success: true,
+          message: "Password updated successfully! Switching to login screen...",
+        });
+
+        setTimeout(() => {
+          setLoginMode("login");
+          setLoginStep("credentials");
+          setPassInput("");
+          setRecoveryCode("");
+          setResetNewPass("");
+          setResetConfirmPass("");
+          setForgotStatus(null);
+        }, 1800);
+      } else {
+        setForgotStatus({
+          success: false,
+          message: resJson.error || "Failed to reset password. Please check your verification code.",
+        });
+      }
+    } catch (err: any) {
+      setForgotStatus({
+        success: false,
+        message: err.message || "Network error resetting password.",
+      });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  // Handlers for Tab 08 Security Management
+  const handleUpdatePasswordInTab = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordUpdateStatus(null);
+
+    const configuredPass = data.securityConfig?.customPassword || adminPass;
+    if (currentPasswordInput !== configuredPass) {
+      setPasswordUpdateStatus({
+        success: false,
+        message: "Current password is incorrect.",
+      });
+      return;
+    }
+
+    if (newPasswordInput.length < 6) {
+      setPasswordUpdateStatus({
+        success: false,
+        message: "New password must be at least 6 characters.",
+      });
+      return;
+    }
+
+    if (newPasswordInput !== confirmPasswordInput) {
+      setPasswordUpdateStatus({
+        success: false,
+        message: "New password and confirmation do not match.",
+      });
+      return;
+    }
+
+    setUpdatingPassword(true);
+    const updatedSec: AdminSecurityConfig = {
+      ...(data.securityConfig || defaultSecurityConfig),
+      customPassword: newPasswordInput,
+    };
+
+    setData((prev) => ({ ...prev, securityConfig: updatedSec }));
+    const saved = await updatePortfolioSection("securityConfig", updatedSec);
+    setUpdatingPassword(false);
+
+    if (saved) {
+      setPasswordUpdateStatus({
+        success: true,
+        message: "Administrator password updated and synced successfully.",
+      });
+      setCurrentPasswordInput("");
+      setNewPasswordInput("");
+      setConfirmPasswordInput("");
+      showToast("Admin password updated!");
+    } else {
+      setPasswordUpdateStatus({
+        success: false,
+        message: "Failed to persist password update to database.",
+      });
+    }
+  };
+
+  const handleGenerateMfa = async () => {
+    setGeneratingMfa(true);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate-mfa",
+          email: data.securityConfig?.email || "monusainideveloper@gmail.com",
+        }),
+      });
+
+      const resJson = await res.json();
+      if (res.ok && resJson.success) {
+        const updatedSec: AdminSecurityConfig = {
+          ...(data.securityConfig || defaultSecurityConfig),
+          mfaSecret: resJson.secret,
+          mfaQrUrl: resJson.qrCodeUrl,
+          backupCodes: resJson.backupCodes,
+        };
+        setData((prev) => ({ ...prev, securityConfig: updatedSec }));
+        await updatePortfolioSection("securityConfig", updatedSec);
+        showToast("New MFA QR code and secret generated!");
+      }
+    } catch (err: any) {
+      showToast("Error generating MFA: " + err.message);
+    } finally {
+      setGeneratingMfa(false);
+    }
+  };
+
+  const handleToggleMfa = async () => {
+    const nextState = !data.securityConfig?.mfaEnabled;
+
+    if (nextState && (!data.securityConfig?.mfaSecret || !data.securityConfig?.mfaQrUrl)) {
+      await handleGenerateMfa();
+    }
+
+    const updatedSec: AdminSecurityConfig = {
+      ...(data.securityConfig || defaultSecurityConfig),
+      mfaEnabled: nextState,
+    };
+
+    setData((prev) => ({ ...prev, securityConfig: updatedSec }));
+    await updatePortfolioSection("securityConfig", updatedSec);
+    showToast(nextState ? "Two-Factor Authentication (2FA) ENABLED" : "Two-Factor Authentication (2FA) DISABLED");
+  };
+
+  const handleTestMfaToken = async () => {
+    if (!mfaTestToken.trim()) return;
+    setMfaTesting(true);
+    setMfaTestResult(null);
+
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify-mfa",
+          token: mfaTestToken.trim(),
+          secret: data.securityConfig?.mfaSecret,
+          backupCodes: data.securityConfig?.backupCodes || [],
+        }),
+      });
+
+      const resJson = await res.json();
+      if (res.ok && resJson.valid) {
+        setMfaTestResult({
+          success: true,
+          message: resJson.isBackup
+            ? "Valid Emergency Backup Code recognized!"
+            : "Verification Passed! Your authenticator app is synced properly.",
+        });
+      } else {
+        setMfaTestResult({
+          success: false,
+          message: resJson.error || "Token verification failed. Please check the code or time sync.",
+        });
+      }
+    } catch (err: any) {
+      setMfaTestResult({
+        success: false,
+        message: err.message || "Failed to contact verification service.",
+      });
+    } finally {
+      setMfaTesting(false);
+    }
+  };
+
+  const handleRegenerateBackupCodes = async () => {
+    const newCodes = Array.from({ length: 4 }, () => {
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      return `MONU-${rand}`;
+    });
+
+    const updatedSec: AdminSecurityConfig = {
+      ...(data.securityConfig || defaultSecurityConfig),
+      backupCodes: newCodes,
+    };
+    setData((prev) => ({ ...prev, securityConfig: updatedSec }));
+    await updatePortfolioSection("securityConfig", updatedSec);
+    showToast("New emergency backup codes generated!");
+  };
+
+  const handleCopySecret = (secret: string) => {
+    navigator.clipboard.writeText(secret);
+    setCopiedSecret(true);
+    setTimeout(() => setCopiedSecret(false), 2000);
+  };
+
+  const handleCopyBackupCodes = (codes: string[]) => {
+    navigator.clipboard.writeText(codes.join("\n"));
+    setCopiedBackup(true);
+    setTimeout(() => setCopiedBackup(false), 2000);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("admin_auth");
+    setIsAuthenticated(false);
+    setPassInput("");
+    setMfaCodeInput("");
+    setLoginStep("credentials");
+    setLoginMode("login");
+  };
+
+  // Login Screen (Credentials, 2FA Challenge & Password Recovery)
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-term-bg flex items-center justify-center p-4 selection:bg-cyan-500/30">
-        <div className="max-w-md w-full p-8 rounded-2xl bg-term-card border border-term-border space-y-6 shadow-2xl font-mono text-xs">
+        <div className="max-w-md w-full p-6 sm:p-8 rounded-2xl bg-term-card border border-term-border space-y-6 shadow-2xl font-mono text-xs">
+          {/* Header */}
           <div className="flex items-center space-x-3 border-b border-slate-800 pb-4">
             <div className="p-2 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800">
               <Shield className="w-5 h-5" />
@@ -261,38 +670,309 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-slate-400 block text-[11px]">Passphrase</label>
-              <input
-                type="password"
-                value={passInput}
-                onChange={(e) => setPassInput(e.target.value)}
-                placeholder="Enter admin password (default: monu2026)"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
-                autoFocus
-              />
-            </div>
+          {/* MODE 1: Standard Login or 2FA Challenge */}
+          {loginMode === "login" && (
+            <>
+              {loginStep === "credentials" ? (
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  {/* Admin Email */}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 block text-[11px] flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Administrator Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="monusainideveloper@gmail.com"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                      autoFocus
+                    />
+                  </div>
 
-            {authError && (
-              <div className="text-red-400 text-[11px] flex items-center gap-1.5 bg-red-950/40 p-2.5 rounded-lg border border-red-800/40">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Invalid passphrase. Try &apos;monu2026&apos; or check .env.local.</span>
+                  {/* Admin Password */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-slate-400 block text-[11px] flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Passphrase</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginMode("forgot");
+                          setForgotStep(1);
+                          setForgotStatus(null);
+                          setAuthError(null);
+                        }}
+                        className="text-cyan-400 hover:text-cyan-300 text-[10px] transition-colors underline decoration-dotted"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={passInput}
+                        onChange={(e) => setPassInput(e.target.value)}
+                        placeholder="Enter admin password (default: monu2026)"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 pr-10 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {authError && (
+                    <div className="text-red-400 text-[11px] flex items-start gap-1.5 bg-red-950/40 p-2.5 rounded-lg border border-red-800/40">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{authError}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={authLoading}
+                    className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <span>{authLoading ? "AUTHENTICATING..." : "AUTHENTICATE"}</span>
+                    <Shield className="w-3.5 h-3.5" />
+                  </button>
+                </form>
+              ) : (
+                /* Step 2: 2FA MFA Verification */
+                <form onSubmit={handleMfaSubmit} className="space-y-4">
+                  <div className="p-3.5 rounded-lg bg-cyan-950/40 border border-cyan-800/60 text-cyan-300 flex items-start gap-2.5">
+                    <Smartphone className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-bold text-white text-[11px]">TWO-FACTOR AUTHENTICATION ACTIVE</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
+                        Enter the 6-digit TOTP code generated by Google Authenticator, or use one of your emergency backup codes.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 block text-[11px] flex items-center gap-1.5">
+                      <Key className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>6-Digit Code or Emergency Backup Code</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={mfaCodeInput}
+                      onChange={(e) => setMfaCodeInput(e.target.value)}
+                      placeholder="e.g. 123456 or MONU-XXXX"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-center tracking-widest text-sm"
+                      autoFocus
+                    />
+                  </div>
+
+                  {authError && (
+                    <div className="text-red-400 text-[11px] flex items-start gap-1.5 bg-red-950/40 p-2.5 rounded-lg border border-red-800/40">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>{authError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginStep("credentials");
+                        setAuthError(null);
+                        setMfaCodeInput("");
+                      }}
+                      className="w-1/3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back</span>
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={authLoading}
+                      className="w-2/3 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>{authLoading ? "VERIFYING..." : "VERIFY CODE"}</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </>
+          )}
+
+          {/* MODE 2: Password Recovery (Forgot Password Workflow) */}
+          {loginMode === "forgot" && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-cyan-400">
+                <Key className="w-4 h-4" />
+                <span className="font-bold text-white text-xs uppercase">Administrator Passphrase Recovery</span>
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-2"
-            >
-              <span>AUTHENTICATE</span>
-              <Shield className="w-3.5 h-3.5" />
-            </button>
-          </form>
+              {forgotStep === 1 ? (
+                <form onSubmit={handleSendRecoveryCode} className="space-y-4">
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Enter the registered administrator email. A 6-digit recovery code will be dispatched to your inbox via the configured SMTP relay.
+                  </p>
 
-          <div className="text-center pt-2">
-            <Link href="/" className="text-slate-500 hover:text-cyan-400 transition-colors text-[11px]">
-              &larr; Return to Live Portfolio
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 block text-[11px]">Administrator Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="monusainideveloper@gmail.com"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                      autoFocus
+                    />
+                  </div>
+
+                  {forgotStatus && (
+                    <div
+                      className={`text-[11px] p-2.5 rounded-lg border flex items-start gap-1.5 ${
+                        forgotStatus.success
+                          ? "bg-emerald-950/40 border-emerald-800/50 text-emerald-300"
+                          : "bg-red-950/40 border-red-800/50 text-red-300"
+                      }`}
+                    >
+                      {forgotStatus.success ? (
+                        <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      )}
+                      <span>{forgotStatus.message}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginMode("login");
+                        setForgotStep(1);
+                        setForgotStatus(null);
+                      }}
+                      className="w-1/3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back</span>
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="w-2/3 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{forgotLoading ? "SENDING..." : "SEND CODE"}</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPasswordSubmit} className="space-y-3.5">
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Check your email inbox for the 6-digit recovery code. (Emergency master code: <code className="text-cyan-400">MONU-RECOVER-2026</code>)
+                  </p>
+
+                  {forgotStatus?.devCode && (
+                    <div className="p-2.5 rounded-lg bg-amber-950/50 border border-amber-800/60 text-amber-300 text-[11px] space-y-1">
+                      <div className="font-bold flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <span>Development Fallback Code</span>
+                      </div>
+                      <div className="font-mono text-sm tracking-widest text-white">{forgotStatus.devCode}</div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 block text-[11px]">6-Digit Recovery Code</label>
+                    <input
+                      type="text"
+                      required
+                      value={recoveryCode}
+                      onChange={(e) => setRecoveryCode(e.target.value)}
+                      placeholder="e.g. 482910 or MONU-RECOVER-2026"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 block text-[11px]">New Passphrase (min 6 characters)</label>
+                    <input
+                      type="password"
+                      required
+                      value={resetNewPass}
+                      onChange={(e) => setResetNewPass(e.target.value)}
+                      placeholder="Enter new admin password"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 block text-[11px]">Confirm New Passphrase</label>
+                    <input
+                      type="password"
+                      required
+                      value={resetConfirmPass}
+                      onChange={(e) => setResetConfirmPass(e.target.value)}
+                      placeholder="Confirm new password"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                    />
+                  </div>
+
+                  {forgotStatus && (
+                    <div
+                      className={`text-[11px] p-2.5 rounded-lg border flex items-start gap-1.5 ${
+                        forgotStatus.success
+                          ? "bg-emerald-950/40 border-emerald-800/50 text-emerald-300"
+                          : "bg-red-950/40 border-red-800/50 text-red-300"
+                      }`}
+                    >
+                      {forgotStatus.success ? (
+                        <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      )}
+                      <span>{forgotStatus.message}</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setForgotStep(1)}
+                      className="w-1/3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back</span>
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="w-2/3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>{forgotLoading ? "RESETTING..." : "RESET PASSWORD"}</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
+          <div className="text-center pt-2 border-t border-slate-800">
+            <Link href="/" className="text-slate-500 hover:text-cyan-400 transition-colors text-[11px] inline-flex items-center gap-1">
+              <span>&larr; Return to Live Portfolio</span>
             </Link>
           </div>
         </div>
@@ -367,7 +1047,7 @@ export default function AdminDashboard() {
           <div className="px-2.5 pb-2 pt-1 flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             <span>Telemetry Modules</span>
             <span className="text-cyan-400 text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">
-              7 Active
+              8 Active
             </span>
           </div>
 
@@ -1823,6 +2503,444 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 8: Security & MFA */}
+        {activeTab === "security" && (
+          <div className="space-y-6 font-mono text-xs">
+            {/* Header with Save Button */}
+            <div className="p-6 sm:p-8 rounded-2xl bg-term-card border border-term-border space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/80">
+                      <ShieldCheck className="w-4 h-4" />
+                    </span>
+                    <h2 className="text-lg font-bold text-white uppercase">
+                      ADMIN SECURITY GATE &amp; MFA
+                    </h2>
+                  </div>
+                  <p className="text-slate-400 text-[11px]">
+                    Manage admin credentials, update passphrase, configure TOTP authenticator with QR code &amp; emergency backup codes
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleSaveSection("securityConfig")}
+                  disabled={saving}
+                  className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold flex items-center gap-1.5 transition-all glow-emerald shrink-0"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{saving ? "Saving..." : "Save Security Config"}</span>
+                </button>
+              </div>
+
+              {/* CARD 1: Administrator Credentials & Password Management */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-5">
+                <div className="flex items-center space-x-2.5 border-b border-slate-800/70 pb-3">
+                  <span className="p-1.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/80">
+                    <Key className="w-3.5 h-3.5" />
+                  </span>
+                  <div>
+                    <h3 className="text-white font-bold text-sm">1. Administrator Email &amp; Password Management</h3>
+                    <p className="text-[11px] text-slate-400">
+                      Update the administrator email and change your login passphrase
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 text-[11px] font-semibold flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-cyan-400" />
+                      <span>Administrator Email</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={data.securityConfig?.email || ""}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          securityConfig: {
+                            ...(data.securityConfig || defaultSecurityConfig),
+                            email: e.target.value,
+                          },
+                        })
+                      }
+                      placeholder="monusainideveloper@gmail.com"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
+                    />
+                    <p className="text-[10px] text-slate-500">
+                      Used for login authentication and receiving 6-digit recovery OTP codes.
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 text-[11px] font-semibold flex items-center gap-1">
+                      <Lock className="w-3 h-3 text-cyan-400" />
+                      <span>Active Password Status</span>
+                    </label>
+                    <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between">
+                      <span className="text-slate-300 font-mono tracking-widest text-xs">
+                        ••••••••••••••••
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-semibold">
+                        {data.securityConfig?.customPassword ? "CUSTOM SET" : "DEFAULT (monu2026)"}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500">
+                      Fallback environment default: <code>monu2026</code>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Password Change Form */}
+                <form
+                  onSubmit={handleUpdatePasswordInTab}
+                  className="p-4 rounded-lg bg-slate-950/60 border border-slate-800/80 space-y-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-white font-bold text-xs flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Change Administrator Passphrase</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowUpdatePasswords(!showUpdatePasswords)}
+                      className="text-slate-400 hover:text-white text-[11px] flex items-center gap-1 transition-colors"
+                    >
+                      {showUpdatePasswords ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <span>{showUpdatePasswords ? "Hide" : "Show"} Characters</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-slate-400 text-[10px]">Current Passphrase</label>
+                      <input
+                        type={showUpdatePasswords ? "text" : "password"}
+                        required
+                        value={currentPasswordInput}
+                        onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                        placeholder="Current password"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-cyan-400 text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-400 text-[10px]">New Passphrase (min 6 chars)</label>
+                      <input
+                        type={showUpdatePasswords ? "text" : "password"}
+                        required
+                        value={newPasswordInput}
+                        onChange={(e) => setNewPasswordInput(e.target.value)}
+                        placeholder="New password"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-cyan-400 text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-400 text-[10px]">Confirm New Passphrase</label>
+                      <input
+                        type={showUpdatePasswords ? "text" : "password"}
+                        required
+                        value={confirmPasswordInput}
+                        onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                        placeholder="Confirm new password"
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-cyan-400 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {passwordUpdateStatus && (
+                    <div
+                      className={`p-2.5 rounded-lg border text-xs font-mono flex items-center gap-2 ${
+                        passwordUpdateStatus.success
+                          ? "bg-emerald-950/50 border-emerald-800/70 text-emerald-300"
+                          : "bg-red-950/50 border-red-800/70 text-red-300"
+                      }`}
+                    >
+                      {passwordUpdateStatus.success ? (
+                        <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                      )}
+                      <span>{passwordUpdateStatus.message}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="submit"
+                      disabled={updatingPassword}
+                      className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Key className="w-3.5 h-3.5" />
+                      <span>{updatingPassword ? "UPDATING..." : "Update Passphrase"}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* CARD 2: Two-Factor Authentication (MFA / TOTP) & QR Code */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/70 pb-3">
+                  <div className="flex items-center space-x-2.5">
+                    <span className="p-1.5 rounded-lg bg-purple-950 text-purple-400 border border-purple-800/80">
+                      <Smartphone className="w-3.5 h-3.5" />
+                    </span>
+                    <div>
+                      <h3 className="text-white font-bold text-sm">2. Two-Factor Authentication (TOTP / Authenticator App)</h3>
+                      <p className="text-[11px] text-slate-400">
+                        Compatible with Google Authenticator, Microsoft Authenticator, Authy, and 1Password
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5 border ${
+                        data.securityConfig?.mfaEnabled
+                          ? "bg-emerald-950/80 text-emerald-400 border-emerald-800"
+                          : "bg-amber-950/80 text-amber-400 border-amber-800"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          data.securityConfig?.mfaEnabled ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                        }`}
+                      />
+                      <span>{data.securityConfig?.mfaEnabled ? "2FA ENABLED" : "2FA DISABLED"}</span>
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={handleToggleMfa}
+                      className={`px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all flex items-center gap-1.5 ${
+                        data.securityConfig?.mfaEnabled
+                          ? "bg-red-950/80 hover:bg-red-900/80 text-red-300 border border-red-800"
+                          : "bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg shadow-emerald-950/50"
+                      }`}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>{data.securityConfig?.mfaEnabled ? "Disable 2FA" : "Enable 2FA"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* QR Code and Secret Key Setup Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-4 rounded-xl bg-slate-950/50 border border-slate-800/80">
+                  {/* Left Column: QR Code */}
+                  <div className="lg:col-span-4 flex flex-col items-center justify-center p-4 bg-slate-900/80 rounded-xl border border-slate-800 text-center space-y-3">
+                    <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <QrCode className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Scan With Authenticator</span>
+                    </div>
+
+                    {data.securityConfig?.mfaQrUrl ? (
+                      <div className="p-3 bg-slate-950 rounded-xl border-2 border-cyan-500/40 shadow-lg shadow-cyan-950/60 inline-block">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={data.securityConfig.mfaQrUrl}
+                          alt="MFA QR Code"
+                          className="w-48 h-48 rounded-lg object-contain mx-auto"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-48 h-48 rounded-xl border border-dashed border-slate-700 bg-slate-950 flex flex-col items-center justify-center p-4 text-center text-slate-500 text-xs">
+                        <QrCode className="w-8 h-8 mb-2 opacity-50" />
+                        <span>No QR Code generated yet</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleGenerateMfa}
+                      disabled={generatingMfa}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/60 text-[11px] font-semibold transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${generatingMfa ? "animate-spin" : ""}`} />
+                      <span>{generatingMfa ? "Generating..." : "Regenerate QR & Secret"}</span>
+                    </button>
+                  </div>
+
+                  {/* Right Column: Secret Key & Backup Codes */}
+                  <div className="lg:col-span-8 space-y-4">
+                    {/* Manual Secret Key */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-slate-300 text-[11px] font-semibold flex items-center gap-1.5">
+                          <Key className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Manual Setup Key (Base32 Secret)</span>
+                        </label>
+                        <span className="text-[10px] text-slate-500">RFC 6238 TOTP Standard</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs tracking-wider break-all select-all font-bold">
+                          {data.securityConfig?.mfaSecret || "Click 'Regenerate QR & Secret' above to generate"}
+                        </div>
+                        {data.securityConfig?.mfaSecret && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopySecret(data.securityConfig?.mfaSecret || "")}
+                            className="p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors shrink-0 flex items-center gap-1 text-[11px]"
+                            title="Copy secret to clipboard"
+                          >
+                            {copiedSecret ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                            <span>{copiedSecret ? "Copied" : "Copy"}</span>
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-relaxed">
+                        If you cannot scan the QR code, open your authenticator app, choose &quot;Enter a setup key&quot;, set account name to <code>Monu Saini Portfolio</code> and paste this key.
+                      </p>
+                    </div>
+
+                    {/* Emergency Backup Codes */}
+                    <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <div className="text-white font-bold text-xs flex items-center gap-1.5">
+                            <Shield className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Emergency Single-Use Backup Codes</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">
+                            Use these if you lose access to your authenticator app
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleCopyBackupCodes(data.securityConfig?.backupCodes || [])}
+                            className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] flex items-center gap-1 transition-colors border border-slate-700"
+                          >
+                            {copiedBackup ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedBackup ? "Copied All" : "Copy Codes"}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRegenerateBackupCodes}
+                            className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] flex items-center gap-1 transition-colors border border-slate-700"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            <span>Regenerate</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                        {(data.securityConfig?.backupCodes || ["MONU-1029", "MONU-3829", "MONU-7401", "MONU-9512"]).map(
+                          (code, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2 rounded bg-slate-950 border border-slate-800 text-center font-mono text-xs font-bold text-emerald-300 tracking-wider"
+                            >
+                              {code}
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 3: Live Verification Code Tester */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
+                <div className="flex items-center space-x-2.5 border-b border-slate-800/70 pb-3">
+                  <span className="p-1.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/80">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                  </span>
+                  <div>
+                    <h3 className="text-white font-bold text-sm">3. Live TOTP Token Verification Tester</h3>
+                    <p className="text-[11px] text-slate-400">
+                      Validate your authenticator app code right now to confirm time synchronization
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={mfaTestToken}
+                      onChange={(e) => setMfaTestToken(e.target.value)}
+                      placeholder="Enter 6-digit code (e.g. 842109) or backup code"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono tracking-widest text-sm"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleTestMfaToken}
+                    disabled={mfaTesting || !mfaTestToken.trim()}
+                    className="px-5 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 text-xs shrink-0"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>{mfaTesting ? "VALIDATING..." : "Test 6-Digit Code"}</span>
+                  </button>
+                </div>
+
+                {mfaTestResult && (
+                  <div
+                    className={`p-3 rounded-lg border text-xs font-mono flex items-center gap-2 ${
+                      mfaTestResult.success
+                        ? "bg-emerald-950/50 border-emerald-800/70 text-emerald-300"
+                        : "bg-red-950/50 border-red-800/70 text-red-300"
+                    }`}
+                  >
+                    {mfaTestResult.success ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                    )}
+                    <span>{mfaTestResult.message}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* CARD 4: Security Telemetry & Cryptographic Parameters */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 space-y-3">
+                <div className="flex items-center space-x-2.5 border-b border-slate-800/70 pb-3">
+                  <span className="p-1.5 rounded-lg bg-amber-950 text-amber-400 border border-amber-800/80">
+                    <Lock className="w-3.5 h-3.5" />
+                  </span>
+                  <div>
+                    <h3 className="text-white font-bold text-sm">4. Security Gate Telemetry &amp; Recovery Fallback</h3>
+                    <p className="text-[11px] text-slate-400">
+                      Cryptographic parameters and emergency fail-safe rules
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-[11px]">
+                  <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800">
+                    <div className="text-slate-500 uppercase text-[9px] font-bold">TOTP Algorithm</div>
+                    <div className="text-cyan-300 font-bold mt-0.5">RFC 6238 (HMAC-SHA1)</div>
+                    <div className="text-slate-400 text-[10px] mt-1">30s time-step / 6 digits</div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800">
+                    <div className="text-slate-500 uppercase text-[9px] font-bold">Master Recovery Code</div>
+                    <div className="text-emerald-400 font-bold mt-0.5">MONU-RECOVER-2026</div>
+                    <div className="text-slate-400 text-[10px] mt-1">Hardcoded fail-safe override</div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800">
+                    <div className="text-slate-500 uppercase text-[9px] font-bold">Cloud Persistence</div>
+                    <div className="text-purple-300 font-bold mt-0.5">Firebase Realtime DB</div>
+                    <div className="text-slate-400 text-[10px] mt-1">Encrypted JSON Node: /securityConfig</div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800">
+                    <div className="text-slate-500 uppercase text-[9px] font-bold">Password Reset Channel</div>
+                    <div className="text-amber-300 font-bold mt-0.5">SMTP Relay Dispatcher</div>
+                    <div className="text-slate-400 text-[10px] mt-1">15-minute expiring token</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

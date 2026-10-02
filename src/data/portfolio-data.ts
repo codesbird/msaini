@@ -1,4 +1,4 @@
-import { Project, Experience, Education, SkillCategory, DigitalTwinQA, PersonalInfo, SmtpConfig } from "@/types/portfolio";
+import { Project, Experience, Education, SkillCategory, DigitalTwinQA, PersonalInfo, SmtpConfig, AdminSecurityConfig } from "@/types/portfolio";
 
 export const personalInfo: PersonalInfo = {
   name: "Monu Saini",
@@ -267,4 +267,13 @@ export const defaultSmtpConfig: SmtpConfig = {
   fromEmail: process.env.SMTP_FROM || "Monu Saini Portfolio <monusainideveloper@gmail.com>",
   toEmail: process.env.SMTP_TO || "monusainideveloper@gmail.com",
   enabled: process.env.SMTP_ENABLED === "true" || false,
+};
+
+export const defaultSecurityConfig: AdminSecurityConfig = {
+  email: "monusainideveloper@gmail.com",
+  customPassword: "",
+  mfaEnabled: false,
+  mfaSecret: "",
+  mfaQrUrl: "",
+  backupCodes: ["MONU-8941", "SAINI-2390", "DEV-5512", "GATE-7740"],
 };

@@ -8,6 +8,7 @@ import {
   educationData as defaultEducationData,
   digitalTwinQA as defaultDigitalTwinQA,
   defaultSmtpConfig,
+  defaultSecurityConfig,
 } from "@/data/portfolio-data";
 import { PortfolioData, MetricItem } from "@/types/portfolio";
 
@@ -51,6 +52,7 @@ export const defaultPortfolioData: PortfolioData = {
   educationData: defaultEducationData,
   digitalTwinQA: defaultDigitalTwinQA,
   smtpConfig: defaultSmtpConfig,
+  securityConfig: defaultSecurityConfig,
   lastUpdated: new Date().toISOString(),
 };
 
@@ -88,6 +90,7 @@ export async function fetchPortfolioData(): Promise<PortfolioData> {
             educationData: json.data.educationData || defaultPortfolioData.educationData,
             digitalTwinQA: json.data.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
             smtpConfig: json.data.smtpConfig || defaultPortfolioData.smtpConfig,
+            securityConfig: json.data.securityConfig || defaultPortfolioData.securityConfig,
             lastUpdated: json.data.lastUpdated || defaultPortfolioData.lastUpdated,
           };
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
@@ -121,6 +124,7 @@ export function subscribeToPortfolio(callback: (data: PortfolioData) => void): (
               educationData: val.educationData || defaultPortfolioData.educationData,
               digitalTwinQA: val.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
               smtpConfig: val.smtpConfig || defaultPortfolioData.smtpConfig,
+              securityConfig: val.securityConfig || defaultPortfolioData.securityConfig,
               lastUpdated: val.lastUpdated || defaultPortfolioData.lastUpdated,
             };
             callback(merged);
