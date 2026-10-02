@@ -1,0 +1,57 @@
+# Monu Saini
+
+Monu Saini is a Python Developer and AI Automation Engineer based in Jaipur and New Delhi, India. He specializes in Python backend development, Django, Django REST Framework, Flask, FastAPI, autonomous AI agents, n8n workflows, Model Context Protocol (MCP), REST APIs, AWS, PostgreSQL, Docker, and Linux automation.
+
+## Core Identity & Positioning
+- Name: Monu Saini
+- Current Title: Python Developer & AI Automation Engineer
+- Alternative Handles & Aliases: Tech2Saini, monusaini786, monupydev, codesbird, devmonusaini, mr.saini.ji_1
+- Core Focus: Transforming manual business processes into autonomous, sub-second pipelines and building resilient Python web architectures.
+- Status: Available immediately for full-time Software Developer, Python Backend SDE, and AI Automation Engineer roles.
+- Preferred Locations: Noida, Gurugram, Delhi, Jaipur, and Remote.
+- Email: monusainideveloper@gmail.com
+- Phone: +91 8696807790
+
+## Primary Technical Expertise
+- Languages: Python 3.12, JavaScript (ESNext), SQL, Bash / Shell, C/C++, HTML5/CSS3
+- Backend Frameworks: Django, Django REST Framework (DRF), Flask, FastAPI, RESTful API Design
+- AI & Agent Orchestration: n8n Workflows, Model Context Protocol (MCP), Google Gemini AI, Claude API, OpenAI API
+- Machine Learning & Data: XGBoost, Scikit-learn, NLP text classification, Pandas, NumPy
+- Cloud, DevOps & Databases: AWS (S3, EC2), PostgreSQL, MySQL, SQLite, Firebase Realtime Database, Docker, Git CI/CD, Ubuntu Linux Server
+- Web Automation: Selenium WebDriver, Headless Browsers, Webhook Event Handlers, Cron Schedulers
+
+## Verified Public Profiles
+- Website: https://monusaini.dev/
+- About: https://monusaini.dev/about
+- GitHub (Primary): https://github.com/tech2saini
+- GitHub (Alias): https://github.com/codesbird
+- GitHub (Alias): https://github.com/devmonusaini
+- LinkedIn: https://www.linkedin.com/in/monupydev/
+- HackerRank: https://www.hackerrank.com/profile/tech2saini
+- Freelancer: https://www.freelancer.com/u/monusaini786
+- Instagram: https://www.instagram.com/mr.saini.ji_1/
+
+## Key Production Projects
+1. Autonomous WhatsApp AI Agent for Blogging:
+   - Full lifecycle blog drafting, updating, publishing, and deletion to Google Blogger entirely via WhatsApp chat messages.
+   - Built with n8n, Python, WhatsApp Cloud API webhooks, and Google Blogger REST APIs.
+2. Fake News Detection & Fact-Checking System:
+   - 92.4% accuracy machine learning platform analyzing news claims using TF-IDF, XGBoost classifier, and Google Gemini AI contextual cross-verification.
+   - Built with Python, Django, Django REST Framework, and Bootstrap.
+3. KSecure – Dark Patterns Recognition Chrome Extension:
+   - Real-time sub-50ms DOM parsing extension detecting deceptive e-commerce UI patterns (fake scarcity, hidden costs).
+   - Built with JavaScript Manifest v3 and Flask Bernoulli Naive Bayes classifier.
+4. Optimiseres – eCommerce Platform & MCP Automation:
+   - Corporate marketing and service portal with Model Context Protocol (MCP) integrations for Walmart Seller Central and advertising automation.
+   - Built with Python, Flask, JavaScript, and Vercel GitHub CI/CD.
+
+## Education & Academic Credentials
+- Master of Computer Applications (MCA) in Software Engineering:
+  - Institution: Dr. A.P.J. Abdul Kalam Technical University (AKTU) / Greater Noida Institute of Technology (GNIOT) (2023 – 2025)
+  - Grade: CGPA 7.5 / 10
+- Bachelor of Computer Applications (BCA):
+  - Institution: University of Rajasthan, Jaipur (2020 – 2023)
+  - Grade: CGPA 7.5 / 10
+- Diploma in Advanced Networking & System Administration:
+  - Institution: IANT (Institute of Advance Network Technology) (2019 – 2020)
+  - Grade: Grade A
