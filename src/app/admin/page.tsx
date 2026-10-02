@@ -8,8 +8,18 @@ import {
   seedFirebaseWithDefaults,
   defaultPortfolioData,
 } from "@/lib/portfolio-service";
+import { defaultSmtpConfig } from "@/data/portfolio-data";
 import { isFirebaseConfigured } from "@/lib/firebase";
-import { PortfolioData, Project, SkillCategory, Experience, Education, DigitalTwinQA, MetricItem } from "@/types/portfolio";
+import {
+  PortfolioData,
+  Project,
+  SkillCategory,
+  Experience,
+  Education,
+  DigitalTwinQA,
+  MetricItem,
+  SmtpConfig,
+} from "@/types/portfolio";
 import { FileUpload } from "@/components/admin/FileUpload";
 import {
   Shield,
@@ -29,6 +39,12 @@ import {
   BookOpen,
   Bot,
   Layers,
+  Mail,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  EyeOff,
+  Send,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -37,8 +53,27 @@ export default function AdminDashboard() {
   const [authError, setAuthError] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
-    "profile" | "metrics" | "projects" | "skills" | "timeline" | "ai"
+    "profile" | "metrics" | "projects" | "skills" | "timeline" | "ai" | "smtp"
   >("profile");
+
+  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
+    server: true,
+    auth: true,
+    routing: true,
+    test: true,
+  });
+
+  const toggleAccordion = (section: string) => {
+    setOpenAccordions((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [testingSmtp, setTestingSmtp] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    success?: boolean;
+    message?: string;
+    error?: string;
+  } | null>(null);
 
   const [data, setData] = useState<PortfolioData>(defaultPortfolioData);
   const [loading, setLoading] = useState(true);
@@ -114,6 +149,38 @@ export default function AdminDashboard() {
       loadData();
     } else {
       showToast("Firebase credentials not configured yet. Using local fallback.");
+    }
+  };
+
+  const handleTestSmtp = async () => {
+    setTestingSmtp(true);
+    setTestResult(null);
+    try {
+      const activeConfig = data.smtpConfig || defaultPortfolioData.smtpConfig || defaultSmtpConfig;
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "test",
+          config: activeConfig,
+        }),
+      });
+      const resJson = await res.json();
+      if (res.ok && resJson.success) {
+        setTestResult({ success: true, message: resJson.message });
+      } else {
+        setTestResult({
+          success: false,
+          error: resJson.error || "Handshake failed. Please verify host, user, and password.",
+        });
+      }
+    } catch (err: any) {
+      setTestResult({
+        success: false,
+        error: err.message || "Network error when attempting SMTP verification.",
+      });
+    } finally {
+      setTestingSmtp(false);
     }
   };
 
@@ -313,6 +380,18 @@ export default function AdminDashboard() {
           >
             <Bot className="w-4 h-4" />
             <span>06. AI Digital Twin</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("smtp")}
+            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+              activeTab === "smtp"
+                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
+                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
+            }`}
+          >
+            <Mail className="w-4 h-4" />
+            <span>07. SMTP &amp; Mail Relay</span>
           </button>
         </div>
 
@@ -1125,6 +1204,385 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 7: SMTP Relay Configuration (Editable with Accordion) */}
+        {activeTab === "smtp" && (
+          <div className="p-6 sm:p-8 rounded-2xl bg-term-card border border-term-border space-y-6 font-mono text-xs">
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-4 gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-white">SMTP RELAY &amp; EMAIL DISPATCHER</h2>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded border font-semibold ${
+                      data.smtpConfig?.enabled
+                        ? "bg-emerald-950 text-emerald-400 border-emerald-800"
+                        : "bg-amber-950 text-amber-400 border-amber-800"
+                    }`}
+                  >
+                    {data.smtpConfig?.enabled ? "LIVE_RELAY_ACTIVE" : "STANDBY_MODE"}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-[11px] pt-0.5">
+                  Route incoming recruiter transmissions from /contact and home page directly to your inbox.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSaveSection("smtpConfig")}
+                  disabled={saving}
+                  className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold flex items-center gap-1.5 transition-all glow-emerald"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{saving ? "Saving..." : "Save SMTP Settings"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Accordion Container */}
+            <div className="space-y-4">
+              {/* Accordion 1: Server Connection & Protocols */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion("server")}
+                  className="w-full p-4 bg-slate-900/90 hover:bg-slate-850 flex items-center justify-between text-left transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <span className="p-1.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/80">
+                      <Cpu className="w-3.5 h-3.5" />
+                    </span>
+                    <div>
+                      <div className="text-white font-bold">1. SMTP Server &amp; Connection Protocols</div>
+                      <div className="text-[11px] text-slate-400">Host, port, SSL/TLS, and relay status toggle</div>
+                    </div>
+                  </div>
+                  {openAccordions.server ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+
+                {openAccordions.server && (
+                  <div className="p-4 sm:p-5 border-t border-slate-800/80 space-y-4 bg-slate-950/40">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label className="text-slate-300 text-[11px] font-semibold">SMTP Host</label>
+                        <input
+                          type="text"
+                          value={data.smtpConfig?.host || ""}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                host: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="e.g. smtp.gmail.com or smtp.sendgrid.net"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-slate-300 text-[11px] font-semibold">Port</label>
+                        <input
+                          type="number"
+                          value={data.smtpConfig?.port || 587}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                port: parseInt(e.target.value, 10) || 587,
+                              },
+                            })
+                          }
+                          placeholder="587, 465, or 25"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                      <label className="flex items-center space-x-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={data.smtpConfig?.secure || false}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                secure: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded border-slate-700 text-cyan-500 focus:ring-0 w-4 h-4 bg-slate-800"
+                        />
+                        <div>
+                          <div className="text-slate-200 font-semibold">Use SSL / Direct TLS (Port 465)</div>
+                          <div className="text-[10px] text-slate-500">Uncheck for STARTTLS (Standard Port 587)</div>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center space-x-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={data.smtpConfig?.enabled || false}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                enabled: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded border-slate-700 text-emerald-500 focus:ring-0 w-4 h-4 bg-slate-800"
+                        />
+                        <div>
+                          <div className="text-slate-200 font-semibold">Enable Live SMTP Dispatch</div>
+                          <div className="text-[10px] text-slate-500">When disabled, inquiries are safely queued in database</div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 2: Authentication Credentials */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion("auth")}
+                  className="w-full p-4 bg-slate-900/90 hover:bg-slate-850 flex items-center justify-between text-left transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <span className="p-1.5 rounded-lg bg-purple-950 text-purple-400 border border-purple-800/80">
+                      <Shield className="w-3.5 h-3.5" />
+                    </span>
+                    <div>
+                      <div className="text-white font-bold">2. Authentication &amp; Credentials</div>
+                      <div className="text-[11px] text-slate-400">Username, account password, or app-specific key</div>
+                    </div>
+                  </div>
+                  {openAccordions.auth ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+
+                {openAccordions.auth && (
+                  <div className="p-4 sm:p-5 border-t border-slate-800/80 space-y-4 bg-slate-950/40">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-slate-300 text-[11px] font-semibold">SMTP Username / Email</label>
+                        <input
+                          type="text"
+                          value={data.smtpConfig?.user || ""}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                user: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="e.g. monusainideveloper@gmail.com"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-slate-300 text-[11px] font-semibold">SMTP Password / App Password</label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={data.smtpConfig?.pass || ""}
+                            onChange={(e) =>
+                              setData({
+                                ...data,
+                                smtpConfig: {
+                                  ...(data.smtpConfig || defaultSmtpConfig),
+                                  pass: e.target.value,
+                                },
+                              })
+                            }
+                            placeholder="Enter 16-character Google App Password or SMTP key"
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 pr-10 text-white focus:outline-none focus:border-cyan-400"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
+                            title={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-blue-950/30 border border-blue-900/40 text-[11px] text-blue-300 leading-relaxed font-sans">
+                      <strong>Tip for Gmail / Google Workspace:</strong> Enable 2-Step Verification in Google Account, then generate an <em>App Password</em> (under Security &rarr; 2-Step Verification &rarr; App passwords). Paste the 16-character code above.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 3: Sender & Destination Routing */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion("routing")}
+                  className="w-full p-4 bg-slate-900/90 hover:bg-slate-850 flex items-center justify-between text-left transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <span className="p-1.5 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800/80">
+                      <Mail className="w-3.5 h-3.5" />
+                    </span>
+                    <div>
+                      <div className="text-white font-bold">3. Sender Identity &amp; Destination Routing</div>
+                      <div className="text-[11px] text-slate-400">Header envelope From address and inbox receiver destination</div>
+                    </div>
+                  </div>
+                  {openAccordions.routing ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+
+                {openAccordions.routing && (
+                  <div className="p-4 sm:p-5 border-t border-slate-800/80 space-y-4 bg-slate-950/40">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-slate-300 text-[11px] font-semibold">From Header / Sender Identity</label>
+                        <input
+                          type="text"
+                          value={data.smtpConfig?.fromEmail || ""}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                fromEmail: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="e.g. Monu Saini Portfolio <monusainideveloper@gmail.com>"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-slate-300 text-[11px] font-semibold">Destination Email (Where inquiries go)</label>
+                        <input
+                          type="email"
+                          value={data.smtpConfig?.toEmail || ""}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                toEmail: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="e.g. monusainideveloper@gmail.com"
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 4: Handshake & Test Dispatcher */}
+              <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion("test")}
+                  className="w-full p-4 bg-slate-900/90 hover:bg-slate-850 flex items-center justify-between text-left transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <span className="p-1.5 rounded-lg bg-amber-950 text-amber-400 border border-amber-800/80">
+                      <Zap className="w-3.5 h-3.5" />
+                    </span>
+                    <div>
+                      <div className="text-white font-bold">4. Live Handshake Verification &amp; Test Mailer</div>
+                      <div className="text-[11px] text-slate-400">Validate credentials and test delivery in real-time</div>
+                    </div>
+                  </div>
+                  {openAccordions.test ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+
+                {openAccordions.test && (
+                  <div className="p-4 sm:p-5 border-t border-slate-800/80 space-y-4 bg-slate-950/40">
+                    <p className="text-slate-300 text-xs font-sans">
+                      Test the configured server connection without leaving the CMS. This verifies the TLS handshake and dispatches a diagnostic message to <code className="text-cyan-400">{data.smtpConfig?.toEmail || "destination inbox"}</code>.
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleTestSmtp}
+                        disabled={testingSmtp}
+                        className="px-4 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-black font-bold flex items-center gap-2 transition-all disabled:opacity-50 text-xs"
+                      >
+                        {testingSmtp ? (
+                          <>
+                            <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                            <span>VERIFYING HANDSHAKE...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3.5 h-3.5" />
+                            <span>Run SMTP Handshake &amp; Send Test Email</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {testResult && (
+                      <div
+                        className={`p-3.5 rounded-lg border text-xs font-mono ${
+                          testResult.success
+                            ? "bg-emerald-950/50 border-emerald-800/70 text-emerald-300"
+                            : "bg-red-950/50 border-red-800/70 text-red-300"
+                        }`}
+                      >
+                        <div className="font-bold flex items-center gap-1.5">
+                          {testResult.success ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 text-emerald-400" />
+                              <span>{testResult.message}</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle className="w-4 h-4 text-red-400" />
+                              <span>Handshake Error: {testResult.error}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

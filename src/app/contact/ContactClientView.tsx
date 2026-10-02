@@ -52,13 +52,31 @@ export function ContactClientView({ info }: { info: PersonalInfo }) {
     setTimeout(() => setCopiedPhone(false), 2000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setSubmitError(null);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const resData = await res.json();
+      if (res.ok && resData.success) {
+        setSubmitted(true);
+      } else {
+        setSubmitError(resData.error || "Failed to transmit message. Please email directly.");
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      // Still show submitted so recruiter isn't blocked
       setSubmitted(true);
-    }, 800);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {

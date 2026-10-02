@@ -86,6 +86,17 @@ export interface DigitalTwinQA {
   keywords: string[];
 }
 
+export interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  fromEmail: string;
+  toEmail: string;
+  enabled: boolean;
+}
+
 export interface PortfolioData {
   personalInfo: PersonalInfo;
   metrics: MetricItem[];
@@ -94,5 +105,6 @@ export interface PortfolioData {
   experienceData: Experience[];
   educationData: Education[];
   digitalTwinQA: DigitalTwinQA[];
+  smtpConfig?: SmtpConfig;
   lastUpdated?: string;
 }

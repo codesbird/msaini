@@ -7,6 +7,7 @@ import {
   experienceData as defaultExperienceData,
   educationData as defaultEducationData,
   digitalTwinQA as defaultDigitalTwinQA,
+  defaultSmtpConfig,
 } from "@/data/portfolio-data";
 import { PortfolioData, MetricItem } from "@/types/portfolio";
 
@@ -49,6 +50,7 @@ export const defaultPortfolioData: PortfolioData = {
   experienceData: defaultExperienceData,
   educationData: defaultEducationData,
   digitalTwinQA: defaultDigitalTwinQA,
+  smtpConfig: defaultSmtpConfig,
   lastUpdated: new Date().toISOString(),
 };
 
@@ -85,6 +87,7 @@ export async function fetchPortfolioData(): Promise<PortfolioData> {
             experienceData: json.data.experienceData || defaultPortfolioData.experienceData,
             educationData: json.data.educationData || defaultPortfolioData.educationData,
             digitalTwinQA: json.data.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
+            smtpConfig: json.data.smtpConfig || defaultPortfolioData.smtpConfig,
             lastUpdated: json.data.lastUpdated || defaultPortfolioData.lastUpdated,
           };
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
@@ -117,6 +120,7 @@ export function subscribeToPortfolio(callback: (data: PortfolioData) => void): (
               experienceData: val.experienceData || defaultPortfolioData.experienceData,
               educationData: val.educationData || defaultPortfolioData.educationData,
               digitalTwinQA: val.digitalTwinQA || defaultPortfolioData.digitalTwinQA,
+              smtpConfig: val.smtpConfig || defaultPortfolioData.smtpConfig,
               lastUpdated: val.lastUpdated || defaultPortfolioData.lastUpdated,
             };
             callback(merged);

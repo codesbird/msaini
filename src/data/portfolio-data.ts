@@ -1,4 +1,4 @@
-import { Project, Experience, Education, SkillCategory, DigitalTwinQA, PersonalInfo } from "@/types/portfolio";
+import { Project, Experience, Education, SkillCategory, DigitalTwinQA, PersonalInfo, SmtpConfig } from "@/types/portfolio";
 
 export const personalInfo: PersonalInfo = {
   name: "Monu Saini",
@@ -256,3 +256,14 @@ export const digitalTwinQA: DigitalTwinQA[] = [
     keywords: ["contact", "email", "phone", "interview", "hire", "reach"],
   },
 ];
+
+export const defaultSmtpConfig: SmtpConfig = {
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587", 10),
+  secure: process.env.SMTP_SECURE === "true",
+  user: process.env.SMTP_USER || "monusainideveloper@gmail.com",
+  pass: process.env.SMTP_PASS || "",
+  fromEmail: process.env.SMTP_FROM || "Monu Saini Portfolio <monusainideveloper@gmail.com>",
+  toEmail: process.env.SMTP_TO || "monusainideveloper@gmail.com",
+  enabled: process.env.SMTP_ENABLED === "true" || false,
+};
