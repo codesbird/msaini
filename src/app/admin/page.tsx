@@ -440,46 +440,15 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        {/* Bottom: Persistence & Session Controls */}
-        <div className="p-3 border-t border-term-border shrink-0 space-y-2.5 bg-term-card/60 font-mono text-xs">
-          <div className="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1 text-[10px]">
-            <div className="flex justify-between items-center text-slate-400">
-              <span>Region:</span>
-              <span className="text-slate-200 font-bold">IN-NORTH / SG</span>
-            </div>
-            <div className="flex justify-between items-center text-slate-400">
-              <span>Uptime:</span>
-              <span className="text-emerald-400 font-bold">99.98%</span>
-            </div>
-          </div>
-
+        {/* Bottom: Logout Only */}
+        <div className="p-3 border-t border-term-border shrink-0 font-mono text-xs">
           <button
-            onClick={handleSeedDefaults}
-            disabled={saving}
-            className="w-full py-2 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-850 border border-slate-700 text-slate-300 text-[11px] flex items-center justify-center gap-1.5 transition-colors font-mono"
-            title="Seed initial data into Firebase Realtime Database"
+            onClick={handleLogout}
+            className="w-full py-2.5 px-3 rounded-lg bg-slate-900/80 hover:bg-red-950/50 border border-slate-800 hover:border-red-800/70 text-slate-400 hover:text-red-300 flex items-center justify-center gap-2 transition-all font-semibold"
           >
-            <Database className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Seed Firebase Defaults</span>
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
           </button>
-
-          <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-            <Link
-              href="/"
-              target="_blank"
-              className="p-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 text-cyan-300 text-center flex items-center justify-center gap-1 transition-colors font-semibold"
-            >
-              <span>View Site</span>
-              <ExternalLink className="w-2.5 h-2.5" />
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="p-1.5 rounded-lg bg-slate-900 hover:bg-red-950/60 hover:border-red-800 border border-slate-800 text-slate-400 hover:text-red-300 text-center flex items-center justify-center gap-1 transition-colors"
-            >
-              <LogOut className="w-3 h-3" />
-              <span>Sign Out</span>
-            </button>
-          </div>
         </div>
       </aside>
 
@@ -506,24 +475,6 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-            <Link
-              href="/about"
-              target="_blank"
-              className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] transition-colors"
-            >
-              <span>/about</span>
-              <ExternalLink className="w-2.5 h-2.5" />
-            </Link>
-
-            <Link
-              href="/contact"
-              target="_blank"
-              className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] transition-colors"
-            >
-              <span>/contact</span>
-              <ExternalLink className="w-2.5 h-2.5" />
-            </Link>
-
             <Link
               href="/"
               target="_blank"
