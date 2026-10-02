@@ -23,6 +23,7 @@ Monu Saini is a Python Developer and AI Automation Engineer based in Jaipur and 
 ## Verified Public Profiles
 - Website: https://monusaini.dev/
 - About: https://monusaini.dev/about
+- Contact & Hire: https://monusaini.dev/contact
 - GitHub (Primary): https://github.com/tech2saini
 - GitHub (Alias): https://github.com/codesbird
 - GitHub (Alias): https://github.com/devmonusaini
