@@ -45,6 +45,9 @@ import {
   Eye,
   EyeOff,
   Send,
+  Menu,
+  X,
+  ChevronRight,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -55,6 +58,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<
     "profile" | "metrics" | "projects" | "skills" | "timeline" | "ai" | "smtp"
   >("profile");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     server: true,
@@ -81,6 +85,64 @@ export default function AdminDashboard() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "monu2026";
+
+  const navItems = [
+    {
+      id: "profile" as const,
+      num: "01",
+      label: "Hero & Profile",
+      sub: "Bio, roles & social links",
+      icon: User,
+    },
+    {
+      id: "metrics" as const,
+      num: "02",
+      label: "Live Metrics",
+      sub: `${data.metrics?.length || 4} telemetry counters`,
+      badge: `${data.metrics?.length || 4}`,
+      icon: Zap,
+    },
+    {
+      id: "projects" as const,
+      num: "03",
+      label: "Projects Matrix",
+      sub: `${data.projects?.length || 0} showcase projects`,
+      badge: `${data.projects?.length || 0}`,
+      icon: FolderGit2,
+    },
+    {
+      id: "skills" as const,
+      num: "04",
+      label: "Skills Engine",
+      sub: `${data.skillCategories?.length || 0} skill categories`,
+      badge: `${data.skillCategories?.length || 0}`,
+      icon: Layers,
+    },
+    {
+      id: "timeline" as const,
+      num: "05",
+      label: "Career Timeline",
+      sub: `${(data.experienceData?.length || 0) + (data.educationData?.length || 0)} milestones`,
+      badge: `${(data.experienceData?.length || 0) + (data.educationData?.length || 0)}`,
+      icon: BookOpen,
+    },
+    {
+      id: "ai" as const,
+      num: "06",
+      label: "AI Digital Twin",
+      sub: `${data.digitalTwinQA?.length || 0} dataset entries`,
+      badge: `${data.digitalTwinQA?.length || 0}`,
+      icon: Bot,
+    },
+    {
+      id: "smtp" as const,
+      num: "07",
+      label: "SMTP Mail Relay",
+      sub: data.smtpConfig?.enabled ? "Active & Routing" : "Standby (Disabled)",
+      statusDot: data.smtpConfig?.enabled ? "bg-emerald-400" : "bg-slate-500",
+      icon: Mail,
+    },
+  ];
 
   // Check auth session
   useEffect(() => {
@@ -250,15 +312,24 @@ export default function AdminDashboard() {
 
       {/* Top Admin Header */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-term-bg/90 border-b border-term-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between font-mono text-xs">
+        <div className="max-w-7xl 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between font-mono text-xs">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400 font-bold">
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:text-cyan-400 hover:border-cyan-500/50 transition-colors"
+              aria-label="Toggle navigation drawer"
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+
+            <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400 font-bold shrink-0">
               <Shield className="w-4 h-4" />
             </div>
             <div>
               <div className="font-bold text-white flex items-center gap-2">
                 CMS CONTROL CENTER
-                <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 hidden sm:inline">
                   DYNAMIC
                 </span>
               </div>
@@ -268,28 +339,31 @@ export default function AdminDashboard() {
                     isFirebaseConfigured() ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
                   }`}
                 ></span>
-                <span>
+                <span className="hidden sm:inline">
                   {isFirebaseConfigured() ? "Firebase Realtime DB: Connected" : "Local Cache Mode (No Firebase URL)"}
+                </span>
+                <span className="sm:hidden text-[10px]">
+                  {isFirebaseConfigured() ? "DB Connected" : "Local Mode"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <button
               onClick={handleSeedDefaults}
               disabled={saving}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[11px]"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[11px] transition-colors"
               title="Populate Firebase Realtime Database with initial portfolio data"
             >
               <Database className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Seed Firebase Defaults</span>
+              <span>Seed Defaults</span>
             </button>
 
             <Link
               href="/"
               target="_blank"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 text-cyan-300 font-semibold text-[11px]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 text-cyan-300 font-semibold text-[11px] transition-colors"
             >
               <span>View Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -304,96 +378,245 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-b border-term-border bg-term-bg/95 backdrop-blur-md p-4 space-y-3 font-mono text-xs animate-fade-in shadow-2xl">
+            <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase tracking-wider font-semibold pb-1 border-b border-slate-800">
+              <span>Telemetry Modules</span>
+              <span className="text-cyan-400">7 Sections</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`p-2.5 rounded-lg flex items-center justify-between text-left transition-all ${
+                      isActive
+                        ? "bg-cyan-950/90 text-cyan-300 border border-cyan-500/60 font-bold shadow-md shadow-cyan-950/50"
+                        : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800 hover:bg-slate-850"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className={`p-1.5 rounded shrink-0 ${
+                          isActive
+                            ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
+                            : "bg-slate-800 text-slate-500"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="truncate">
+                        <span className="text-slate-500 text-[10px] mr-1">{item.num}.</span>
+                        <span>{item.label}</span>
+                      </div>
+                    </div>
+                    {item.badge && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-mono">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Main Admin Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-term-border pb-3 font-mono text-xs">
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "profile"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <User className="w-4 h-4" />
-            <span>01. Hero &amp; Profile</span>
-          </button>
+      {/* Main Admin Layout with Sidebar */}
+      <div className="max-w-7xl 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+          {/* Left Sidebar */}
+          <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-20 space-y-4">
+            {/* Mobile Module Quick Switcher */}
+            <div className="lg:hidden flex items-center justify-between p-3.5 rounded-xl bg-term-card border border-term-border text-xs font-mono shadow-md">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800">
+                  {(() => {
+                    const current = navItems.find((i) => i.id === activeTab);
+                    const CurIcon = current?.icon || User;
+                    return <CurIcon className="w-4 h-4" />;
+                  })()}
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    Active Module
+                  </div>
+                  <div className="text-white font-bold text-xs">
+                    {navItems.find((i) => i.id === activeTab)?.label}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 text-[11px] font-mono flex items-center gap-1.5 hover:bg-slate-800 transition-colors"
+              >
+                <span>Modules</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-          <button
-            onClick={() => setActiveTab("metrics")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "metrics"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <Zap className="w-4 h-4" />
-            <span>02. Metrics</span>
-          </button>
+            {/* Desktop Sidebar Module Navigation Panel */}
+            <div className="hidden lg:block bg-term-card border border-term-border rounded-xl p-3.5 shadow-lg">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider font-mono">
+                    Telemetry Modules
+                  </span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-mono">
+                  7 Sections
+                </span>
+              </div>
 
-          <button
-            onClick={() => setActiveTab("projects")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "projects"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <FolderGit2 className="w-4 h-4" />
-            <span>03. Projects ({data.projects.length})</span>
-          </button>
+              {/* Navigation Links */}
+              <nav className="mt-3 space-y-1.5 font-mono">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-lg flex items-center justify-between transition-all group ${
+                        isActive
+                          ? "bg-gradient-to-r from-cyan-950/80 to-slate-900/90 text-white border-l-2 border-l-cyan-400 border-y border-r border-cyan-800/50 shadow-md shadow-cyan-950/30"
+                          : "bg-slate-900/40 hover:bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800/80"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`p-1.5 rounded-md shrink-0 transition-colors ${
+                            isActive
+                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                              : "bg-slate-800/70 text-slate-500 group-hover:text-slate-300 border border-slate-700/50"
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div
+                            className={`text-[11px] font-semibold truncate flex items-center gap-1.5 ${
+                              isActive ? "text-cyan-200" : "text-slate-300 group-hover:text-white"
+                            }`}
+                          >
+                            <span className="text-slate-500 text-[10px]">{item.num}.</span>
+                            <span>{item.label}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 truncate">{item.sub}</div>
+                        </div>
+                      </div>
 
-          <button
-            onClick={() => setActiveTab("skills")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "skills"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>04. Skills Matrix</span>
-          </button>
+                      <div className="shrink-0 pl-2 flex items-center gap-1.5">
+                        {item.statusDot && (
+                          <span className={`w-2 h-2 rounded-full ${item.statusDot}`}></span>
+                        )}
+                        {item.badge && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                              isActive
+                                ? "bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold"
+                                : "bg-slate-800 text-slate-400 border border-slate-700"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                        <ChevronRight
+                          className={`w-3.5 h-3.5 transition-transform ${
+                            isActive
+                              ? "text-cyan-400 translate-x-0.5"
+                              : "text-slate-600 group-hover:text-slate-400"
+                          }`}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
 
-          <button
-            onClick={() => setActiveTab("timeline")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "timeline"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>05. Experience &amp; Education</span>
-          </button>
+            {/* System Status & Quick Actions Card */}
+            <div className="hidden lg:block bg-term-card border border-term-border rounded-xl p-3.5 shadow-lg space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-slate-800 pb-2">
+                <span className="flex items-center gap-1.5">
+                  <Database className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Persistence Engine</span>
+                </span>
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-mono ${
+                    isFirebaseConfigured()
+                      ? "bg-emerald-950 text-emerald-400 border border-emerald-800"
+                      : "bg-amber-950 text-amber-400 border border-amber-800"
+                  }`}
+                >
+                  {isFirebaseConfigured() ? "ONLINE" : "LOCAL"}
+                </span>
+              </div>
 
-          <button
-            onClick={() => setActiveTab("ai")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "ai"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <Bot className="w-4 h-4" />
-            <span>06. AI Digital Twin</span>
-          </button>
+              <div className="space-y-1.5 text-[10px] text-slate-400">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Cloud Region:</span>
+                  <span className="text-slate-300 font-mono">IN-NORTH / SG</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Database:</span>
+                  <span className="text-slate-300 font-mono truncate max-w-[140px]" title="Firebase Realtime Database">
+                    Firebase RTDB
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Uptime:</span>
+                  <span className="text-emerald-400 font-mono font-bold">99.98%</span>
+                </div>
+              </div>
 
-          <button
-            onClick={() => setActiveTab("smtp")}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-              activeTab === "smtp"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold"
-                : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800"
-            }`}
-          >
-            <Mail className="w-4 h-4" />
-            <span>07. SMTP &amp; Mail Relay</span>
-          </button>
-        </div>
+              <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                <button
+                  onClick={handleSeedDefaults}
+                  disabled={saving}
+                  className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[11px] flex items-center justify-center gap-2 transition-colors font-mono"
+                >
+                  <Database className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Seed Firebase Defaults</span>
+                </button>
+
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                  <Link
+                    href="/about"
+                    target="_blank"
+                    className="p-1.5 rounded bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-center flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <span>/about</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </Link>
+                  <Link
+                    href="/contact"
+                    target="_blank"
+                    className="p-1.5 rounded bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-center flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <span>/contact</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Module Content Area */}
+          <main className="flex-1 min-w-0 w-full space-y-8">
 
         {/* TAB 1: Profile & Hero */}
         {activeTab === "profile" && (
@@ -1712,7 +1935,9 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
-      </main>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
