@@ -33,7 +33,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16 sm:space-y-20">
         {/* Top Hero & Terminal Grid */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-baseline pt-2">
           {/* Left: Hero Info & CTAs (7 Cols) */}
           <div className="lg:col-span-7">
             <HeroSection data={data.personalInfo} />
