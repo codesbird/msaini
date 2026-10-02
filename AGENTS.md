@@ -24,6 +24,8 @@ This file serves as persistent workspace memory and operating guidelines for all
     - Server-side Admin SDK: [`src/lib/firebase-admin.ts`](./src/lib/firebase-admin.ts) using `firebase-admin` v14 modular imports (`firebase-admin/app` and `firebase-admin/database`).
     - API Route: [`src/app/api/portfolio/route.ts`](./src/app/api/portfolio/route.ts) with `GET` (read data), `POST` (update section), and `PUT` (one-click default data seeding).
     - Client-side listener: [`src/lib/firebase.ts`](./src/lib/firebase.ts) & [`src/lib/portfolio-service.ts`](./src/lib/portfolio-service.ts) with real-time UI synchronization and static fallback.
-- **Dynamic Admin Dashboard**: Dedicated CMS control panel at `/admin` (passphrase protected: default `monu2026` via `ADMIN_PASSWORD` / `NEXT_PUBLIC_ADMIN_PASSWORD`) for live edits across all sections.
+- **Dynamic Admin Dashboard**: Dedicated CMS control panel at `/admin` (passphrase protected: default `monu2026` via `ADMIN_PASSWORD` / `NEXT_PUBLIC_ADMIN_PASSWORD`) for live edits across all sections (Hero, Metrics, Projects, Skills, Timeline, AI Twin, and SMTP Relay).
+- **SMTP Mail Relay & Lead Routing**: Managed via [`src/app/api/contact/route.ts`](./src/app/api/contact/route.ts) with `nodemailer`, live handshake diagnostics, and database fallback; configured via multi-section Accordion in CMS.
+- **Dedicated SEO Routes**: Full-featured dedicated `/about` (with Schema.org `Person` JSON-LD, entity aliases, media gallery, and `/llms.txt`) and `/contact` (with `ContactPage` Schema.org and interactive scheduling).
 - **File & Image Uploads**: **Vercel Blob Storage** (`@vercel/blob` via [`src/app/api/upload/route.ts`](./src/app/api/upload/route.ts) & `FileUpload.tsx`) with automatic local base64 fallback.
 - **AI Digital Twin**: Managed via [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with curated QA and semantic matching.

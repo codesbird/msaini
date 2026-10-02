@@ -31,7 +31,9 @@
   - Database URL: `https://portfolio-35cfd-default-rtdb.asia-southeast1.firebasedatabase.app` (Singapore / `asia-southeast1`)
   - Admin SDK Integration: [`src/lib/firebase-admin.ts`](./src/lib/firebase-admin.ts) using modular imports from `firebase-admin/app` & `firebase-admin/database` with automatic newline formatting for `FIREBASE_PRIVATE_KEY`.
   - API Controller: [`src/app/api/portfolio/route.ts`](./src/app/api/portfolio/route.ts) with `GET` (fetch data), `POST` (update section), and `PUT` (one-click default data seeding).
-- **Dynamic Admin Dashboard**: Accessible at `/admin` (passphrase protected: default `monu2026`) allowing live edits to Hero, Metrics, Projects, Skills, Timeline, and Digital Twin QA.
+- **Dynamic Admin Dashboard**: Accessible at `/admin` (passphrase protected: default `monu2026`) allowing live edits to Hero, Metrics, Projects, Skills, Timeline, Digital Twin QA, and SMTP Relay.
+- **SMTP Mail Relay & Lead Routing**: Managed via [`src/app/api/contact/route.ts`](./src/app/api/contact/route.ts) with `nodemailer`, live handshake diagnostics, and database fallback; configured via multi-section Accordion in CMS.
+- **Dedicated SEO Routes**: Full-featured dedicated `/about` (with Schema.org `Person` JSON-LD, entity aliases, media gallery, and `/llms.txt`) and `/contact` (with `ContactPage` Schema.org and interactive scheduling).
 - **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets, with local base64 fallback.
 - **AI Agent API**: Next.js App Router Route Handler at [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with intelligent semantic response synthesis.
 
