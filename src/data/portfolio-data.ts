@@ -20,6 +20,7 @@ export const personalInfo: PersonalInfo = {
   clientSatisfaction: "100%",
   followersCount: "2,900+",
   bio: "MCA graduate and Software Developer with 2+ years of hands-on experience building reliable Python backends, autonomous AI agent workflows (n8n, MCP, WhatsApp API), and data-driven web applications. Passionate about transforming manual processes into autonomous, sub-second pipelines.",
+  resumeUrl: "",
 };
 
 export const projects: Project[] = [

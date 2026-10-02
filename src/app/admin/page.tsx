@@ -662,15 +662,27 @@ export default function AdminDashboard() {
 
               {/* Vercel Blob File Upload for Resume PDF */}
               <FileUpload
-                label="Resume PDF Upload (Vercel Blob Storage)"
+                label="Resume PDF Document (Vercel Blob / Storage)"
                 accept=".pdf,.doc,.docx"
                 currentUrl={data.personalInfo.resumeUrl}
-                onUploaded={(url) =>
-                  setData({
-                    ...data,
-                    personalInfo: { ...data.personalInfo, resumeUrl: url },
-                  })
-                }
+                onUploaded={(url) => {
+                  const updatedInfo = { ...data.personalInfo, resumeUrl: url };
+                  setData((prev) => ({
+                    ...prev,
+                    personalInfo: updatedInfo,
+                  }));
+                  updatePortfolioSection("personalInfo", updatedInfo);
+                  showToast(url ? "Resume uploaded & synced to database!" : "Resume cleared from database");
+                }}
+                onRemoved={() => {
+                  const updatedInfo = { ...data.personalInfo, resumeUrl: "" };
+                  setData((prev) => ({
+                    ...prev,
+                    personalInfo: updatedInfo,
+                  }));
+                  updatePortfolioSection("personalInfo", updatedInfo);
+                  showToast("Resume cleared from database");
+                }}
               />
             </div>
           </div>
@@ -956,13 +968,22 @@ export default function AdminDashboard() {
 
                   {/* Vercel Blob Screenshot Upload */}
                   <FileUpload
-                    label="Project Screenshot / Architecture Diagram (Vercel Blob Storage)"
+                    label="Project Screenshot / Architecture Diagram"
                     accept="image/*"
                     currentUrl={proj.imageUrl}
                     onUploaded={(url) => {
                       const updated = [...data.projects];
                       updated[pIdx].imageUrl = url;
-                      setData({ ...data, projects: updated });
+                      setData((prev) => ({ ...prev, projects: updated }));
+                      updatePortfolioSection("projects", updated);
+                      showToast(url ? `Screenshot for "${proj.title}" saved!` : "Screenshot removed");
+                    }}
+                    onRemoved={() => {
+                      const updated = [...data.projects];
+                      updated[pIdx].imageUrl = "";
+                      setData((prev) => ({ ...prev, projects: updated }));
+                      updatePortfolioSection("projects", updated);
+                      showToast("Screenshot removed");
                     }}
                   />
                 </div>
