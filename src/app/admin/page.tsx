@@ -1270,6 +1270,74 @@ export default function AdminDashboard() {
 
                 {openAccordions.server && (
                   <div className="p-4 sm:p-5 border-t border-slate-800/80 space-y-4 bg-slate-950/40">
+                    {/* Quick Provider Presets */}
+                    <div className="space-y-1.5">
+                      <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Quick Presets:</span>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                host: "smtp.gmail.com",
+                                port: 587,
+                                secure: false,
+                              },
+                            });
+                          }}
+                          className={`px-2.5 py-1 rounded text-[11px] border transition-colors ${
+                            data.smtpConfig?.host === "smtp.gmail.com" && data.smtpConfig?.port === 587 && !data.smtpConfig?.secure
+                              ? "bg-cyan-950 border-cyan-400 text-cyan-300 font-bold"
+                              : "bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800"
+                          }`}
+                        >
+                          ⚡ Gmail Port 587 (STARTTLS - Recommended)
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                host: "smtp.gmail.com",
+                                port: 465,
+                                secure: true,
+                              },
+                            });
+                          }}
+                          className={`px-2.5 py-1 rounded text-[11px] border transition-colors ${
+                            data.smtpConfig?.host === "smtp.gmail.com" && data.smtpConfig?.port === 465 && data.smtpConfig?.secure
+                              ? "bg-emerald-950 border-emerald-400 text-emerald-300 font-bold"
+                              : "bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800"
+                          }`}
+                        >
+                          🔒 Gmail Port 465 (Direct SSL)
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData({
+                              ...data,
+                              smtpConfig: {
+                                ...(data.smtpConfig || defaultSmtpConfig),
+                                host: "smtp.sendgrid.net",
+                                port: 587,
+                                secure: false,
+                              },
+                            });
+                          }}
+                          className="px-2.5 py-1 rounded text-[11px] border bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
+                        >
+                          🌐 SendGrid Port 587
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-1.5 sm:col-span-2">
                         <label className="text-slate-300 text-[11px] font-semibold">SMTP Host</label>
@@ -1295,40 +1363,98 @@ export default function AdminDashboard() {
                         <input
                           type="number"
                           value={data.smtpConfig?.port || 587}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const newPort = parseInt(e.target.value, 10) || 587;
                             setData({
                               ...data,
                               smtpConfig: {
                                 ...(data.smtpConfig || defaultSmtpConfig),
-                                port: parseInt(e.target.value, 10) || 587,
+                                port: newPort,
+                                secure: newPort === 465,
                               },
-                            })
-                          }
-                          placeholder="587, 465, or 25"
+                            });
+                          }}
+                          placeholder="587 or 465"
                           className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-cyan-400"
                         />
                       </div>
                     </div>
+
+                    {/* Protocol Mismatch Helper Callout */}
+                    {data.smtpConfig?.secure && (data.smtpConfig?.port === 587 || data.smtpConfig?.port === 25) && (
+                      <div className="p-3 rounded-lg bg-amber-950/40 border border-amber-800/60 text-amber-300 text-[11px] space-y-1.5 font-sans">
+                        <div className="font-bold flex items-center gap-1.5 font-mono">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Protocol Mismatch Detected: Port 587 + Direct SSL</span>
+                        </div>
+                        <p>
+                          Port 587 uses <strong>STARTTLS</strong> (upgrades from cleartext). Direct SSL is only supported on <strong>Port 465</strong>. Connecting with direct SSL on port 587 triggers OpenSSL <em>&quot;wrong version number&quot;</em> error.
+                        </p>
+                        <div className="flex gap-2 pt-1 font-mono">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setData({
+                                ...data,
+                                smtpConfig: {
+                                  ...(data.smtpConfig || defaultSmtpConfig),
+                                  port: 465,
+                                  secure: true,
+                                },
+                              })
+                            }
+                            className="px-2 py-0.5 rounded bg-amber-900/60 hover:bg-amber-800/60 text-amber-200 border border-amber-700 text-[10px]"
+                          >
+                            Switch to Port 465 (Keep SSL)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setData({
+                                ...data,
+                                smtpConfig: {
+                                  ...(data.smtpConfig || defaultSmtpConfig),
+                                  secure: false,
+                                },
+                              })
+                            }
+                            className="px-2 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800/60 text-cyan-200 border border-cyan-700 text-[10px]"
+                          >
+                            Use STARTTLS on Port 587
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                       <label className="flex items-center space-x-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
                         <input
                           type="checkbox"
                           checked={data.smtpConfig?.secure || false}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
                             setData({
                               ...data,
                               smtpConfig: {
                                 ...(data.smtpConfig || defaultSmtpConfig),
-                                secure: e.target.checked,
+                                secure: isChecked,
+                                port: isChecked
+                                  ? 465
+                                  : data.smtpConfig?.port === 465
+                                  ? 587
+                                  : data.smtpConfig?.port || 587,
                               },
-                            })
-                          }
+                            });
+                          }}
                           className="rounded border-slate-700 text-cyan-500 focus:ring-0 w-4 h-4 bg-slate-800"
                         />
                         <div>
                           <div className="text-slate-200 font-semibold">Use SSL / Direct TLS (Port 465)</div>
-                          <div className="text-[10px] text-slate-500">Uncheck for STARTTLS (Standard Port 587)</div>
+                          <div className="text-[10px] text-slate-500">
+                            {data.smtpConfig?.secure
+                              ? "Active: Direct SMTPS (Port 465)"
+                              : "Unchecked: Uses STARTTLS on Port 587"}
+                          </div>
                         </div>
                       </label>
 

@@ -30,6 +30,52 @@ async function getActiveSmtpConfig(): Promise<SmtpConfig> {
   return defaultSmtpConfig;
 }
 
+function createSmtpTransporter(config: SmtpConfig, timeout = 12000) {
+  const port = Number(config.port) || 587;
+
+  // Intelligent SSL/TLS Resolution:
+  // Port 465 is dedicated for direct SMTPS (secure: true).
+  // Port 587 (and 25) are dedicated for submission with STARTTLS (secure: false).
+  // If 'secure: true' is requested on port 587, OpenSSL throws:
+  // "tls_validate_record_header:wrong version number" because port 587 initially speaks plain ASCII.
+  let isSecure = Boolean(config.secure);
+  if (port === 465) {
+    isSecure = true;
+  } else if (port === 587 || port === 25) {
+    isSecure = false;
+  }
+
+  return nodemailer.createTransport({
+    host: config.host,
+    port,
+    secure: isSecure,
+    auth: {
+      user: config.user,
+      pass: config.pass,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: timeout,
+    greetingTimeout: timeout,
+    socketTimeout: timeout,
+  });
+}
+
+function getFriendlySmtpError(err: any, port: number): string {
+  const msg = err?.message || String(err);
+  if (msg.includes("wrong version number")) {
+    return `TLS Protocol Mismatch: Port ${port} does not support direct SSL socket handshake. Port 587 requires STARTTLS (uncheck 'Use SSL' or switch port to 465).`;
+  }
+  if (msg.includes("Invalid login") || msg.includes("535") || msg.includes("BadCredentials") || msg.includes("Username and Password not accepted")) {
+    return `Authentication Failed: Incorrect username or password. For Gmail, make sure to generate and use a 16-character Google App Password (not your primary password).`;
+  }
+  if (msg.includes("ETIMEDOUT") || msg.includes("ECONNREFUSED") || msg.includes("greeting timeout")) {
+    return `Connection Timeout: Could not connect to SMTP server on port ${port}. Please verify the host address and network/firewall.`;
+  }
+  return msg;
+}
+
 export async function POST(req: Request) {
   try {
     const payload = await req.json();
@@ -48,47 +94,50 @@ export async function POST(req: Request) {
         );
       }
 
-      const transporter = nodemailer.createTransport({
-        host: testConfig.host,
-        port: Number(testConfig.port) || 587,
-        secure: Boolean(testConfig.secure),
-        auth: {
-          user: testConfig.user,
-          pass: testConfig.pass,
-        },
-        connectionTimeout: 10000,
-      });
+      const port = Number(testConfig.port) || 587;
+      const transporter = createSmtpTransporter(testConfig, 12000);
 
-      // Verify connection
-      await transporter.verify();
+      try {
+        // Verify connection handshake
+        await transporter.verify();
 
-      // Send verification email to toEmail
-      const testResult = await transporter.sendMail({
-        from: testConfig.fromEmail || testConfig.user,
-        to: testConfig.toEmail || testConfig.user,
-        subject: `[SMTP Test] Monu Saini Portfolio - Connection Verified`,
-        text: `This is a test notification confirming that the SMTP service on your Monu Saini Portfolio CMS is configured correctly.\n\nHost: ${testConfig.host}\nPort: ${testConfig.port}\nTimestamp: ${new Date().toISOString()}`,
-        html: `
-          <div style="font-family: monospace; background-color: #08090d; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #1e293b;">
-            <h2 style="color: #06b6d4; margin-top: 0;">// SMTP Handshake Successful</h2>
-            <p style="color: #94a3b8; font-size: 13px;">Your portfolio CMS mail server is authenticated and ready to route recruiter inquiries.</p>
-            <div style="background-color: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin: 16px 0; font-size: 12px; color: #cbd5e1;">
-              <div><strong>Host:</strong> ${testConfig.host}</div>
-              <div><strong>Port:</strong> ${testConfig.port}</div>
-              <div><strong>User:</strong> ${testConfig.user}</div>
-              <div><strong>SSL/TLS:</strong> ${testConfig.secure ? "Enabled" : "Disabled (STARTTLS)"}</div>
-              <div><strong>Timestamp:</strong> ${new Date().toISOString()}</div>
+        // Send verification email to toEmail
+        const testResult = await transporter.sendMail({
+          from: testConfig.fromEmail || testConfig.user,
+          to: testConfig.toEmail || testConfig.user,
+          subject: `[SMTP Test] Monu Saini Portfolio - Connection Verified`,
+          text: `This is a test notification confirming that the SMTP service on your Monu Saini Portfolio CMS is configured correctly.\n\nHost: ${testConfig.host}\nPort: ${port}\nSecure Mode: ${port === 465 ? "Direct SSL (Port 465)" : "STARTTLS (Port 587)"}\nTimestamp: ${new Date().toISOString()}`,
+          html: `
+            <div style="font-family: monospace; background-color: #08090d; color: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #1e293b;">
+              <h2 style="color: #06b6d4; margin-top: 0;">// SMTP Handshake Successful</h2>
+              <p style="color: #94a3b8; font-size: 13px;">Your portfolio CMS mail server is authenticated and ready to route recruiter inquiries.</p>
+              <div style="background-color: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; margin: 16px 0; font-size: 12px; color: #cbd5e1;">
+                <div><strong>Host:</strong> ${testConfig.host}</div>
+                <div><strong>Port:</strong> ${port}</div>
+                <div><strong>User:</strong> ${testConfig.user}</div>
+                <div><strong>Security Protocol:</strong> ${port === 465 ? "Direct SSL / SMTPS (Port 465)" : "STARTTLS Auto-Negotiated (Port 587)"}</div>
+                <div><strong>Timestamp:</strong> ${new Date().toISOString()}</div>
+              </div>
+              <div style="color: #10b981; font-weight: bold; font-size: 12px;">✓ Verified by Monu Saini Telemetry Engine</div>
             </div>
-            <div style="color: #10b981; font-weight: bold; font-size: 12px;">✓ Verified by Monu Saini Telemetry Engine</div>
-          </div>
-        `,
-      });
+          `,
+        });
 
-      return NextResponse.json({
-        success: true,
-        message: `SMTP Verified! Test email delivered to ${testConfig.toEmail || testConfig.user}`,
-        messageId: testResult.messageId,
-      });
+        return NextResponse.json({
+          success: true,
+          message: `SMTP Verified! Test email delivered to ${testConfig.toEmail || testConfig.user}`,
+          messageId: testResult.messageId,
+        });
+      } catch (verifyErr: any) {
+        console.error("SMTP Verify/Send test failed:", verifyErr);
+        return NextResponse.json(
+          {
+            success: false,
+            error: getFriendlySmtpError(verifyErr, port),
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Standard Contact Form Submission
@@ -126,17 +175,7 @@ export async function POST(req: Request) {
 
     // If SMTP is enabled and has credentials, send actual email
     if (activeConfig.enabled && activeConfig.host && activeConfig.user && activeConfig.pass) {
-      const transporter = nodemailer.createTransport({
-        host: activeConfig.host,
-        port: Number(activeConfig.port) || 587,
-        secure: Boolean(activeConfig.secure),
-        auth: {
-          user: activeConfig.user,
-          pass: activeConfig.pass,
-        },
-        connectionTimeout: 15000,
-      });
-
+      const transporter = createSmtpTransporter(activeConfig, 15000);
       const emailSubject = `[Portfolio Lead] ${company ? `${company} - ` : ""}${roleType || subject || "New Inquiry"} from ${name}`;
 
       const htmlContent = `
