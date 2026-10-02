@@ -26,15 +26,24 @@
 - **Theme**: **Agentic Terminal & Telemetry** (Cyber-clean dark aesthetic: `#08090d` slate, emerald `#10b981`, and cyan `#06b6d4` glowing accents, `JetBrains Mono` and `Space Grotesk` typography).
 - **Framework**: **Next.js 15 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS**.
 - **Header Preference**: **No latency indicator** in the telemetry header (keep clean `REGION: IN-NORTH` and `UPTIME: 99.98%` only).
+- **Home Page Hero Layout**: Top hero grid inside `<main>` (`src/app/page.tsx`) uses `items-baseline` (`align-items: baseline`) for optimal visual balance between the Left Bio and Right Terminal Emulator.
 - **Data Source**: Decoupled single source of truth in [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts) with real-time cloud synchronization via **Firebase Realtime Database** (`src/lib/firebase.ts` & `src/lib/portfolio-service.ts`).
 - **Firebase Realtime Database Setup**:
   - Database URL: `https://portfolio-35cfd-default-rtdb.asia-southeast1.firebasedatabase.app` (Singapore / `asia-southeast1`)
   - Admin SDK Integration: [`src/lib/firebase-admin.ts`](./src/lib/firebase-admin.ts) using modular imports from `firebase-admin/app` & `firebase-admin/database` with automatic newline formatting for `FIREBASE_PRIVATE_KEY`.
   - API Controller: [`src/app/api/portfolio/route.ts`](./src/app/api/portfolio/route.ts) with `GET` (fetch data), `POST` (update section), and `PUT` (one-click default data seeding).
-- **Dynamic Admin Dashboard**: Accessible at `/admin` (passphrase protected: default `monu2026`) allowing live edits to Hero, Metrics, Projects, Skills, Timeline, Digital Twin QA, and SMTP Relay.
+- **Dynamic Admin Dashboard & Sidebar Architecture**:
+  - Dedicated CMS control panel at `/admin`.
+  - **Layout**: Complete left-aligned, full-height sidebar (`w-72 xl:w-80 fixed inset-y-0 left-0 bg-term-bg border-r border-term-border`) with 8 navigation telemetry modules (`profile`, `metrics`, `projects`, `skills`, `timeline`, `ai`, `smtp`, `security`).
+  - **Clean Navigation**: Sidebar footer contains only the Sign Out button. Admin header contains only module title and external "View Site" link (`/about` and `/contact` links removed from admin side).
+- **Admin Authentication, MFA & Security Gate**:
+  - **Login Gate**: Admin login requires registered email (`monusainideveloper@gmail.com`) and password (default `monu2026` or custom via `securityConfig.customPassword`).
+  - **Two-Factor Authentication (2FA / TOTP)**: Managed in **Tab 08: Security & MFA**. Supports standard TOTP (Google Authenticator, Microsoft Authenticator, Authy) with auto-generated scannable QR code (`qrcode`), Base32 secret key, live token tester, and 4 emergency single-use backup codes (`MONU-XXXX`).
+  - **Forgot Password Recovery**: Self-service recovery workflow dispatching 6-digit expiring OTP codes via the configured SMTP mail relay (with local dev fallback and hardcoded emergency override `MONU-RECOVER-2026`).
+  - **Auth Route Handler**: [`src/app/api/auth/route.ts`](./src/app/api/auth/route.ts) supporting `generate-mfa`, `verify-mfa`, `send-recovery-code`, and `reset-password`.
 - **SMTP Mail Relay & Lead Routing**: Managed via [`src/app/api/contact/route.ts`](./src/app/api/contact/route.ts) with `nodemailer`, live handshake diagnostics, and database fallback; configured via multi-section Accordion in CMS.
 - **Dedicated SEO Routes**: Full-featured dedicated `/about` (with Schema.org `Person` JSON-LD, entity aliases, media gallery, and `/llms.txt`) and `/contact` (with `ContactPage` Schema.org and interactive scheduling).
-- **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets, with local base64 fallback.
+- **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets, with local base64 fallback. Uploaded resume (`resumeUrl`) and avatar (`avatarUrl`) persist in Firebase and display view/download links.
 - **AI Agent API**: Next.js App Router Route Handler at [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with intelligent semantic response synthesis.
 
 ---
