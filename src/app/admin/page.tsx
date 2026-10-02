@@ -301,7 +301,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-term-bg text-slate-200 font-sans selection:bg-cyan-500/30 pb-24">
+    <div className="min-h-screen bg-term-bg text-slate-200 font-sans selection:bg-cyan-500/30 flex">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-slate-900 border border-emerald-500/80 text-emerald-300 font-mono text-xs shadow-2xl flex items-center gap-2 glow-emerald animate-fade-in">
@@ -310,55 +310,219 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Top Admin Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-term-bg/90 border-b border-term-border">
-        <div className="max-w-7xl 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between font-mono text-xs">
-          <div className="flex items-center space-x-3">
-            {/* Mobile Hamburger Menu Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:text-cyan-400 hover:border-cyan-500/50 transition-colors"
-              aria-label="Toggle navigation drawer"
-            >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
+      {/* Mobile Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-            <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400 font-bold shrink-0">
-              <Shield className="w-4 h-4" />
+      {/* COMPLETE LEFT ALIGNED & FULL HEIGHT SIDEBAR */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 xl:w-80 bg-term-bg border-r border-term-border flex flex-col justify-between transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          mobileMenuOpen ? "translate-x-0 shadow-2xl shadow-cyan-950/50" : "-translate-x-full"
+        }`}
+      >
+        {/* Top: Branding & Database Status */}
+        <div className="p-4 border-b border-term-border shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400 font-bold shrink-0 shadow-inner shadow-cyan-900/40">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-bold text-white text-xs flex items-center gap-1.5 font-mono">
+                  <span>CMS CONTROL</span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 font-bold">
+                    LIVE
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-400 flex items-center gap-1.5 font-mono mt-0.5">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isFirebaseConfigured() ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                    }`}
+                  ></span>
+                  <span className="truncate max-w-[130px]">
+                    {isFirebaseConfigured() ? "Firebase RTDB" : "Local Mode"}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="font-bold text-white flex items-center gap-2">
-                CMS CONTROL CENTER
-                <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 hidden sm:inline">
-                  DYNAMIC
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    isFirebaseConfigured() ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+
+            {/* Mobile Close Button */}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Middle: Navigation Modules (Scrollable) */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1 font-mono text-xs scrollbar-thin scrollbar-thumb-slate-800">
+          <div className="px-2.5 pb-2 pt-1 flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            <span>Telemetry Modules</span>
+            <span className="text-cyan-400 text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">
+              7 Active
+            </span>
+          </div>
+
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full text-left p-2.5 rounded-lg flex items-center justify-between transition-all group ${
+                    isActive
+                      ? "bg-gradient-to-r from-cyan-950/90 to-slate-900/90 text-white border-l-2 border-l-cyan-400 border-y border-r border-cyan-800/60 shadow-md shadow-cyan-950/40"
+                      : "bg-slate-900/30 hover:bg-slate-900 text-slate-400 hover:text-slate-200 border border-transparent hover:border-slate-800"
                   }`}
-                ></span>
-                <span className="hidden sm:inline">
-                  {isFirebaseConfigured() ? "Firebase Realtime DB: Connected" : "Local Cache Mode (No Firebase URL)"}
-                </span>
-                <span className="sm:hidden text-[10px]">
-                  {isFirebaseConfigured() ? "DB Connected" : "Local Mode"}
-                </span>
-              </div>
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className={`p-1.5 rounded-md shrink-0 transition-colors ${
+                        isActive
+                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          : "bg-slate-850 text-slate-500 group-hover:text-slate-300 border border-slate-800"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div
+                        className={`text-[11px] font-semibold truncate flex items-center gap-1.5 ${
+                          isActive ? "text-cyan-200 font-bold" : "text-slate-300 group-hover:text-white"
+                        }`}
+                      >
+                        <span className="text-slate-500 text-[10px] font-mono">{item.num}.</span>
+                        <span>{item.label}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate">{item.sub}</div>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 pl-1.5 flex items-center gap-1.5">
+                    {item.statusDot && (
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.statusDot}`}></span>
+                    )}
+                    {item.badge && (
+                      <span
+                        className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
+                          isActive
+                            ? "bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold"
+                            : "bg-slate-850 text-slate-400 border border-slate-700/60"
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                    <ChevronRight
+                      className={`w-3.5 h-3.5 transition-transform ${
+                        isActive
+                          ? "text-cyan-400 translate-x-0.5"
+                          : "text-slate-600 group-hover:text-slate-400"
+                      }`}
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom: Persistence & Session Controls */}
+        <div className="p-3 border-t border-term-border shrink-0 space-y-2.5 bg-term-card/60 font-mono text-xs">
+          <div className="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1 text-[10px]">
+            <div className="flex justify-between items-center text-slate-400">
+              <span>Region:</span>
+              <span className="text-slate-200 font-bold">IN-NORTH / SG</span>
+            </div>
+            <div className="flex justify-between items-center text-slate-400">
+              <span>Uptime:</span>
+              <span className="text-emerald-400 font-bold">99.98%</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <button
-              onClick={handleSeedDefaults}
-              disabled={saving}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[11px] transition-colors"
-              title="Populate Firebase Realtime Database with initial portfolio data"
+          <button
+            onClick={handleSeedDefaults}
+            disabled={saving}
+            className="w-full py-2 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-850 border border-slate-700 text-slate-300 text-[11px] flex items-center justify-center gap-1.5 transition-colors font-mono"
+            title="Seed initial data into Firebase Realtime Database"
+          >
+            <Database className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Seed Firebase Defaults</span>
+          </button>
+
+          <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+            <Link
+              href="/"
+              target="_blank"
+              className="p-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 text-cyan-300 text-center flex items-center justify-center gap-1 transition-colors font-semibold"
             >
-              <Database className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Seed Defaults</span>
+              <span>View Site</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 rounded-lg bg-slate-900 hover:bg-red-950/60 hover:border-red-800 border border-slate-800 text-slate-400 hover:text-red-300 text-center flex items-center justify-center gap-1 transition-colors"
+            >
+              <LogOut className="w-3 h-3" />
+              <span>Sign Out</span>
             </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* RIGHT MAIN WORKSPACE AREA */}
+      <div className="flex-1 lg:pl-72 xl:pl-80 flex flex-col min-w-0 min-h-screen">
+        {/* Top Control Bar */}
+        <header className="sticky top-0 z-30 backdrop-blur-md bg-term-bg/90 border-b border-term-border h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 font-mono text-xs">
+          <div className="flex items-center space-x-3 min-w-0">
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 hover:text-cyan-400 transition-colors"
+              aria-label="Open sidebar navigation"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-slate-500 hidden sm:inline">CONTROL PANEL //</span>
+              <span className="text-cyan-400 font-bold uppercase truncate">
+                {navItems.find((i) => i.id === activeTab)?.num}. {navItems.find((i) => i.id === activeTab)?.label}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+            <Link
+              href="/about"
+              target="_blank"
+              className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] transition-colors"
+            >
+              <span>/about</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </Link>
+
+            <Link
+              href="/contact"
+              target="_blank"
+              className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-[11px] transition-colors"
+            >
+              <span>/contact</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </Link>
 
             <Link
               href="/"
@@ -368,255 +532,11 @@ export default function AdminDashboard() {
               <span>View Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
-
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-              title="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-b border-term-border bg-term-bg/95 backdrop-blur-md p-4 space-y-3 font-mono text-xs animate-fade-in shadow-2xl">
-            <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase tracking-wider font-semibold pb-1 border-b border-slate-800">
-              <span>Telemetry Modules</span>
-              <span className="text-cyan-400">7 Sections</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`p-2.5 rounded-lg flex items-center justify-between text-left transition-all ${
-                      isActive
-                        ? "bg-cyan-950/90 text-cyan-300 border border-cyan-500/60 font-bold shadow-md shadow-cyan-950/50"
-                        : "bg-slate-900/70 text-slate-400 hover:text-white border border-slate-800 hover:bg-slate-850"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={`p-1.5 rounded shrink-0 ${
-                          isActive
-                            ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                            : "bg-slate-800 text-slate-500"
-                        }`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="truncate">
-                        <span className="text-slate-500 text-[10px] mr-1">{item.num}.</span>
-                        <span>{item.label}</span>
-                      </div>
-                    </div>
-                    {item.badge && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-mono">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* Main Admin Layout with Sidebar */}
-      <div className="max-w-7xl 2xl:max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Left Sidebar */}
-          <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-20 space-y-4">
-            {/* Mobile Module Quick Switcher */}
-            <div className="lg:hidden flex items-center justify-between p-3.5 rounded-xl bg-term-card border border-term-border text-xs font-mono shadow-md">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800">
-                  {(() => {
-                    const current = navItems.find((i) => i.id === activeTab);
-                    const CurIcon = current?.icon || User;
-                    return <CurIcon className="w-4 h-4" />;
-                  })()}
-                </div>
-                <div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                    Active Module
-                  </div>
-                  <div className="text-white font-bold text-xs">
-                    {navItems.find((i) => i.id === activeTab)?.label}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 text-[11px] font-mono flex items-center gap-1.5 hover:bg-slate-800 transition-colors"
-              >
-                <span>Modules</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Desktop Sidebar Module Navigation Panel */}
-            <div className="hidden lg:block bg-term-card border border-term-border rounded-xl p-3.5 shadow-lg">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                  <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider font-mono">
-                    Telemetry Modules
-                  </span>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-mono">
-                  7 Sections
-                </span>
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="mt-3 space-y-1.5 font-mono">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`w-full text-left p-2.5 rounded-lg flex items-center justify-between transition-all group ${
-                        isActive
-                          ? "bg-gradient-to-r from-cyan-950/80 to-slate-900/90 text-white border-l-2 border-l-cyan-400 border-y border-r border-cyan-800/50 shadow-md shadow-cyan-950/30"
-                          : "bg-slate-900/40 hover:bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800/80"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className={`p-1.5 rounded-md shrink-0 transition-colors ${
-                            isActive
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                              : "bg-slate-800/70 text-slate-500 group-hover:text-slate-300 border border-slate-700/50"
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div
-                            className={`text-[11px] font-semibold truncate flex items-center gap-1.5 ${
-                              isActive ? "text-cyan-200" : "text-slate-300 group-hover:text-white"
-                            }`}
-                          >
-                            <span className="text-slate-500 text-[10px]">{item.num}.</span>
-                            <span>{item.label}</span>
-                          </div>
-                          <div className="text-[10px] text-slate-500 truncate">{item.sub}</div>
-                        </div>
-                      </div>
-
-                      <div className="shrink-0 pl-2 flex items-center gap-1.5">
-                        {item.statusDot && (
-                          <span className={`w-2 h-2 rounded-full ${item.statusDot}`}></span>
-                        )}
-                        {item.badge && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                              isActive
-                                ? "bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold"
-                                : "bg-slate-800 text-slate-400 border border-slate-700"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                        <ChevronRight
-                          className={`w-3.5 h-3.5 transition-transform ${
-                            isActive
-                              ? "text-cyan-400 translate-x-0.5"
-                              : "text-slate-600 group-hover:text-slate-400"
-                          }`}
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* System Status & Quick Actions Card */}
-            <div className="hidden lg:block bg-term-card border border-term-border rounded-xl p-3.5 shadow-lg space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-slate-800 pb-2">
-                <span className="flex items-center gap-1.5">
-                  <Database className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Persistence Engine</span>
-                </span>
-                <span
-                  className={`px-1.5 py-0.5 rounded text-[9px] font-mono ${
-                    isFirebaseConfigured()
-                      ? "bg-emerald-950 text-emerald-400 border border-emerald-800"
-                      : "bg-amber-950 text-amber-400 border border-amber-800"
-                  }`}
-                >
-                  {isFirebaseConfigured() ? "ONLINE" : "LOCAL"}
-                </span>
-              </div>
-
-              <div className="space-y-1.5 text-[10px] text-slate-400">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Cloud Region:</span>
-                  <span className="text-slate-300 font-mono">IN-NORTH / SG</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Database:</span>
-                  <span className="text-slate-300 font-mono truncate max-w-[140px]" title="Firebase Realtime Database">
-                    Firebase RTDB
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Uptime:</span>
-                  <span className="text-emerald-400 font-mono font-bold">99.98%</span>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-800/80 space-y-2">
-                <button
-                  onClick={handleSeedDefaults}
-                  disabled={saving}
-                  className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[11px] flex items-center justify-center gap-2 transition-colors font-mono"
-                >
-                  <Database className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Seed Firebase Defaults</span>
-                </button>
-
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                  <Link
-                    href="/about"
-                    target="_blank"
-                    className="p-1.5 rounded bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-center flex items-center justify-center gap-1 transition-colors"
-                  >
-                    <span>/about</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </Link>
-                  <Link
-                    href="/contact"
-                    target="_blank"
-                    className="p-1.5 rounded bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-cyan-300 text-center flex items-center justify-center gap-1 transition-colors"
-                  >
-                    <span>/contact</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* Main Module Content Area */}
-          <main className="flex-1 min-w-0 w-full space-y-8">
+        {/* Content Area */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-6xl w-full mx-auto space-y-8">
 
         {/* TAB 1: Profile & Hero */}
         {activeTab === "profile" && (
@@ -1938,6 +1858,5 @@ export default function AdminDashboard() {
           </main>
         </div>
       </div>
-    </div>
-  );
+    );
 }
