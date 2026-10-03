@@ -25,7 +25,7 @@
 ## 🎨 Design & Architecture Preferences
 - **Theme**: **Agentic Terminal & Telemetry** (Cyber-clean dark aesthetic: `#08090d` slate, emerald `#10b981`, and cyan `#06b6d4` glowing accents, `JetBrains Mono` and `Space Grotesk` typography).
 - **Framework**: **Next.js 15 (App Router)** with **React 19**, **TypeScript**, and **Tailwind CSS**.
-- **Header Preference**: **No latency indicator** in the telemetry header (keep clean `REGION: IN-NORTH` and `UPTIME: 99.98%` only).
+- **Header Preference**: **No latency indicator and no availability status** in the telemetry header (keep clean `REGION: IN-NORTH` and `UPTIME: 99.98%` only).
 - **Home Page Hero Layout**: Top hero grid inside `<main>` (`src/app/page.tsx`) uses `items-baseline` (`align-items: baseline`) for optimal visual balance between the Left Bio and Right Terminal Emulator.
 - **Data Source**: Decoupled single source of truth in [`src/data/portfolio-data.ts`](./src/data/portfolio-data.ts) with real-time cloud synchronization via **Firebase Realtime Database** (`src/lib/firebase.ts` & `src/lib/portfolio-service.ts`).
 - **Firebase Realtime Database Setup**:

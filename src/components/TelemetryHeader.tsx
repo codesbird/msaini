@@ -23,10 +23,6 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
             <Terminal className="w-3.5 h-3.5 text-cyan-400" />
             <span>DEV_AGENT::{info.handle.toUpperCase()}</span>
           </Link>
-          <span className="hidden lg:inline text-slate-600">|</span>
-          <span className="hidden lg:inline text-slate-400">
-            STATUS: <span className="text-emerald-400 font-semibold">{info.availabilityStatus}</span>
-          </span>
         </div>
 
         {/* Center: Live Telemetry (No latency per user directive) */}
