@@ -1,0 +1,44 @@
+{
+  "name": "tech2saini",
+  "version": "1.0.0",
+  "description": "Monu Saini's Interactive Terminal Resume & Developer Card — Python Developer & AI Automation Engineer",
+  "main": "./bin/index.js",
+  "bin": {
+    "tech2saini": "./bin/index.js"
+  },
+  "scripts": {
+    "start": "node ./bin/index.js",
+    "test": "node ./bin/index.js --connect --role=python-sde"
+  },
+  "keywords": [
+    "tech2saini",
+    "monu-saini",
+    "npx",
+    "terminal-resume",
+    "interactive-cli",
+    "python-developer",
+    "ai-engineer",
+    "backend-sde",
+    "django",
+    "n8n",
+    "mcp"
+  ],
+  "author": "Monu Saini <monusainideveloper@gmail.com> (https://github.com/tech2saini)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tech2saini/monu-saini-portfolio.git",
+    "directory": "cli"
+  },
+  "bugs": {
+    "url": "https://github.com/tech2saini/monu-saini-portfolio/issues"
+  },
+  "homepage": "https://github.com/tech2saini/monu-saini-portfolio#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ]
+}
