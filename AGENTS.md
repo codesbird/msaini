@@ -38,4 +38,9 @@ This file serves as persistent workspace memory and operating guidelines for all
 - **Dedicated SEO Routes**: Full-featured dedicated `/about` (with Schema.org `Person` JSON-LD, entity aliases, media gallery, and `/llms.txt`) and `/contact` (with `ContactPage` Schema.org and interactive scheduling).
 - **File & Image Uploads**: **Vercel Blob Storage** (`@vercel/blob` via [`src/app/api/upload/route.ts`](./src/app/api/upload/route.ts) & `FileUpload.tsx`) with automatic local base64 fallback. Resume (`resumeUrl`) and avatar (`avatarUrl`) links persist across reloads.
 - **AI Digital Twin**: Managed via [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with curated QA and semantic matching.
-- **Interactive Terminal Resume NPM Package**: Maintained at [`cli/`](./cli/) under package name `tech2saini` with zero external runtime dependencies for instant execution via `npx tech2saini` and `npx tech2saini --connect --role=python-sde`.
+- **Interactive Terminal Resume NPM Package**:
+  - **Live Package**: Published on public npm registry at [`tech2saini`](https://www.npmjs.com/package/tech2saini) (maintainer `sainitech`).
+  - **Source Location**: Managed inside [`cli/`](./cli/) with [`cli/bin/index.js`](./cli/bin/index.js), [`cli/package.json`](./cli/package.json), and [`cli/README.md`](./cli/README.md).
+  - **Architecture**: Zero external runtime dependencies, pure Node.js ANSI styling, 4.7 kB lightweight tarball for sub-second execution via `npx tech2saini`.
+  - **Supported CLI Flags**: `--connect` (direct contact channels), `--role=python-sde` (Python backend highlights), `--role=ai-engineer` (n8n/MCP highlights), `--json` (machine-readable data), `--help`.
+  - **Publishing & Updates**: Run from `cli/` directory. Requires npm access token with write/publish permissions (or 2FA bypass): `npm publish --access public`. Bump version in `cli/package.json` for new releases.
