@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { PersonalInfo } from "@/types/portfolio";
 import { personalInfo as defaultPersonalInfo } from "@/data/portfolio-data";
-import { Terminal, Menu, X, Shield } from "lucide-react";
+import { Terminal, Menu, X } from "lucide-react";
 
 export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,24 +59,10 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
           >
             HIRE_ME
           </Link>
-          <Link
-            href="/admin"
-            className="text-slate-500 hover:text-cyan-300 p-1 rounded"
-            title="Admin CMS Dashboard"
-          >
-            <Shield className="w-3.5 h-3.5" />
-          </Link>
         </nav>
 
         {/* Mobile menu button */}
         <div className="flex items-center space-x-2 lg:hidden">
-          <Link
-            href="/admin"
-            className="p-1.5 text-slate-400 hover:text-cyan-400"
-            title="Admin Dashboard"
-          >
-            <Shield className="w-3.5 h-3.5" />
-          </Link>
           <Link
             href="/contact"
             className="bg-cyan-950/60 text-cyan-400 border border-cyan-800/80 px-2 py-1 rounded text-[11px] font-semibold"
@@ -138,14 +124,6 @@ export function TelemetryHeader({ data }: { data?: PersonalInfo }) {
             className="block text-cyan-400 hover:text-cyan-300 py-1 font-semibold"
           >
             06. CONTACT &amp; HIRE
-          </Link>
-          <Link
-            href="/admin"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-purple-400 hover:text-purple-300 py-1 border-t border-slate-800 pt-2 flex items-center gap-1.5"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>ADMIN CMS DASHBOARD</span>
           </Link>
         </div>
       )}

@@ -38,7 +38,7 @@
   - **Layout**: Complete left-aligned, full-height sidebar (`w-72 xl:w-80 fixed inset-y-0 left-0 bg-term-bg border-r border-term-border`) with 8 navigation telemetry modules (`profile`, `metrics`, `projects`, `skills`, `timeline`, `ai`, `smtp`, `security`).
   - **Clean Navigation**: Sidebar footer contains only the Sign Out button. Admin header contains only module title and external "View Site" link (`/about` and `/contact` links removed from admin side).
 - **Admin Authentication, MFA & Security Gate**:
-  - **Login Gate**: Admin login requires registered email (`monusainideveloper@gmail.com`) and password (default `monu2026` or custom via `securityConfig.customPassword`).
+  - **Login Gate**: Admin login requires registered email and password (configured via `ADMIN_PASSWORD` environment variable or custom via `securityConfig.customPassword`; default fallback `monu2026` removed). Public header/navbar contains no admin links, and admin email/password fields are never prefilled.
   - **Two-Factor Authentication (2FA / TOTP)**: Managed in **Tab 08: Security & MFA**. Supports standard TOTP (Google Authenticator, Microsoft Authenticator, Authy) with auto-generated scannable QR code (`qrcode`), Base32 secret key, live token tester, and 4 emergency single-use backup codes (`MONU-XXXX`).
   - **Forgot Password Recovery**: Self-service recovery workflow dispatching 6-digit expiring OTP codes via the configured SMTP mail relay (with local dev fallback and hardcoded emergency override `MONU-RECOVER-2026`).
   - **Auth Route Handler**: [`src/app/api/auth/route.ts`](./src/app/api/auth/route.ts) supporting `generate-mfa`, `verify-mfa`, `send-recovery-code`, and `reset-password`.

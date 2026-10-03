@@ -124,7 +124,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "monu2026";
+  const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "";
 
   const navItems = [
     {
@@ -211,13 +211,6 @@ export default function AdminDashboard() {
     loadData();
   }, []);
 
-  // Sync default emails when securityConfig is loaded
-  useEffect(() => {
-    if (data.securityConfig?.email) {
-      if (!emailInput) setEmailInput(data.securityConfig.email);
-      if (!forgotEmail) setForgotEmail(data.securityConfig.email);
-    }
-  }, [data.securityConfig?.email]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -286,17 +279,11 @@ export default function AdminDashboard() {
     setAuthError(null);
     setAuthLoading(true);
 
-    const configuredEmail = (data.securityConfig?.email || "monusainideveloper@gmail.com").trim().toLowerCase();
+    const configuredEmail = (data.securityConfig?.email || "").trim().toLowerCase();
     const configuredPass = data.securityConfig?.customPassword || adminPass;
 
-    if (emailInput.trim().toLowerCase() !== configuredEmail) {
-      setAuthError(`Email "${emailInput}" does not match the registered administrator account.`);
-      setAuthLoading(false);
-      return;
-    }
-
-    if (passInput !== configuredPass) {
-      setAuthError("Incorrect password. Please verify your credentials or click 'Forgot Password'.");
+    if (!configuredEmail || !configuredPass || emailInput.trim().toLowerCase() !== configuredEmail || passInput !== configuredPass) {
+      setAuthError("Invalid credentials. Please verify your administrator email and passphrase.");
       setAuthLoading(false);
       return;
     }
@@ -478,7 +465,7 @@ export default function AdminDashboard() {
     setPasswordUpdateStatus(null);
 
     const configuredPass = data.securityConfig?.customPassword || adminPass;
-    if (currentPasswordInput !== configuredPass) {
+    if (configuredPass && currentPasswordInput !== configuredPass) {
       setPasswordUpdateStatus({
         success: false,
         message: "Current password is incorrect.",
@@ -686,7 +673,7 @@ export default function AdminDashboard() {
                       required
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder="monusainideveloper@gmail.com"
+                      placeholder="admin@example.com"
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
                       autoFocus
                     />
@@ -718,7 +705,7 @@ export default function AdminDashboard() {
                         required
                         value={passInput}
                         onChange={(e) => setPassInput(e.target.value)}
-                        placeholder="Enter admin password (default: monu2026)"
+                        placeholder="Enter administrator password"
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 pr-10 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
                       />
                       <button
@@ -831,7 +818,7 @@ export default function AdminDashboard() {
                       required
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      placeholder="monusainideveloper@gmail.com"
+                      placeholder="admin@example.com"
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs"
                       autoFocus
                     />
@@ -2587,11 +2574,11 @@ export default function AdminDashboard() {
                         ••••••••••••••••
                       </span>
                       <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-semibold">
-                        {data.securityConfig?.customPassword ? "CUSTOM SET" : "DEFAULT (monu2026)"}
+                        {data.securityConfig?.customPassword ? "CUSTOM SET" : (adminPass ? "ENV CONFIGURED" : "NOT SET")}
                       </span>
                     </div>
                     <p className="text-[10px] text-slate-500">
-                      Fallback environment default: <code>monu2026</code>
+                      Configured via database custom password or <code>ADMIN_PASSWORD</code> environment variable.
                     </p>
                   </div>
                 </div>

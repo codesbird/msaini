@@ -43,6 +43,7 @@ export function TerminalEmulator({ data }: { data?: PortfolioData }) {
   const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const cancelledRef = useRef<boolean>(false);
   const hasStartedRef = useRef<boolean>(false);
+  const userInteractedRef = useRef<boolean>(false);
 
   // Auto-scroll on any log or stream progress
   useEffect(() => {
@@ -60,12 +61,13 @@ export function TerminalEmulator({ data }: { data?: PortfolioData }) {
     setIsExecuting(false);
   };
 
-  // Dynamic typing intro script for the first 2 questions
+  // Dynamic typing loop script that repeats infinitely until user asks a question or clicks a command
   const startIntro = () => {
     // Stop any ongoing sequence
     stopIntro();
 
     cancelledRef.current = false;
+    userInteractedRef.current = false;
     setIsExecuting(true);
     setHistory([]);
     setActiveItem(null);
@@ -73,77 +75,96 @@ export function TerminalEmulator({ data }: { data?: PortfolioData }) {
     const questions = [
       {
         command: "whoami",
-        output: `${pInfo.name} // ${pInfo.title}.\n${pInfo.subtitle}.\nBased in ${pInfo.location}. Open to full-time SDE roles.`,
+        output: `${pInfo.name} // ${pInfo.title}.\n${pInfo.subtitle}.\nBased in ${pInfo.location}. Open to full-time roles.`,
       },
       {
         command: "skills --summary",
-        output: "Core: Python 3, Django, Flask, FastAPI, n8n AI Agents, Model Context Protocol (MCP), AWS S3/EC2, PostgreSQL, Docker, Selenium, RESTful APIs.",
+        output: "Core: Python 3.12, Django, Flask, FastAPI, n8n AI Agents, Model Context Protocol (MCP), AWS, PostgreSQL, Docker, REST APIs.",
+      },
+      {
+        command: "projects",
+        output: "Featured: Autonomous WhatsApp AI Agent for Blogging, Fake News Detection System (92.4% acc), KSecure Dark Patterns Detector, Optimiseres eCommerce MCP.",
+      },
+      {
+        command: "contact",
+        output: `Email: ${pInfo.email} | Phone: ${pInfo.phone}\nLinkedIn: ${pInfo.linkedin} | GitHub: ${pInfo.github}`,
       },
     ];
 
     const sleep = (ms: number) =>
       new Promise<boolean>((resolve) => {
-        const t = setTimeout(() => resolve(!cancelledRef.current), ms);
+        const t = setTimeout(() => resolve(!cancelledRef.current && !userInteractedRef.current), ms);
         timeoutsRef.current.push(t);
       });
+
+    const isHalted = () => cancelledRef.current || userInteractedRef.current;
 
     const run = async () => {
       // Short delay after render before typing begins
       const initOk = await sleep(600);
-      if (!initOk || cancelledRef.current) return;
+      if (!initOk || isHalted()) return;
 
-      for (let qIdx = 0; qIdx < questions.length; qIdx++) {
-        if (cancelledRef.current) return;
-        const q = questions[qIdx];
+      // Infinite loop until user asks a question or clicks a command
+      while (!isHalted()) {
+        for (let qIdx = 0; qIdx < questions.length; qIdx++) {
+          if (isHalted()) return;
+          const q = questions[qIdx];
 
-        // 1. Initialize active typing state for the command
-        setActiveItem({
-          command: q.command,
-          currentCommand: "",
-          output: q.output,
-          currentOutput: "",
-          isTypingCommand: true,
-          isTypingOutput: false,
-        });
+          // 1. Initialize active typing state for the command
+          setActiveItem({
+            command: q.command,
+            currentCommand: "",
+            output: q.output,
+            currentOutput: "",
+            isTypingCommand: true,
+            isTypingOutput: false,
+          });
 
-        // 2. Type the command string character-by-character
-        for (let i = 0; i < q.command.length; i++) {
-          if (cancelledRef.current) return;
-          const char = q.command[i];
-          setActiveItem((prev) => (prev ? { ...prev, currentCommand: prev.currentCommand + char } : null));
-          const ok = await sleep(45 + Math.random() * 25);
-          if (!ok || cancelledRef.current) return;
-        }
+          // 2. Type the command string character-by-character
+          for (let i = 0; i < q.command.length; i++) {
+            if (isHalted()) return;
+            const char = q.command[i];
+            setActiveItem((prev) => (prev ? { ...prev, currentCommand: prev.currentCommand + char } : null));
+            const ok = await sleep(45 + Math.random() * 25);
+            if (!ok || isHalted()) return;
+          }
 
-        // 3. Command typed: pause briefly (simulating Enter keystroke)
-        setActiveItem((prev) => (prev ? { ...prev, isTypingCommand: false, isTypingOutput: true } : null));
-        const enterOk = await sleep(300);
-        if (!enterOk || cancelledRef.current) return;
+          // 3. Command typed: pause briefly (simulating Enter keystroke)
+          setActiveItem((prev) => (prev ? { ...prev, isTypingCommand: false, isTypingOutput: true } : null));
+          const enterOk = await sleep(300);
+          if (!enterOk || isHalted()) return;
 
-        // 4. Stream stdout response dynamically
-        const fullOutput = q.output;
-        for (let i = 0; i < fullOutput.length; i += 2) {
-          if (cancelledRef.current) return;
-          const chunk = fullOutput.slice(0, i + 2);
-          setActiveItem((prev) => (prev ? { ...prev, currentOutput: chunk } : null));
-          const ok = await sleep(12);
-          if (!ok || cancelledRef.current) return;
-        }
+          // 4. Stream stdout response dynamically
+          const fullOutput = q.output;
+          for (let i = 0; i < fullOutput.length; i += 2) {
+            if (isHalted()) return;
+            const chunk = fullOutput.slice(0, i + 2);
+            setActiveItem((prev) => (prev ? { ...prev, currentOutput: chunk } : null));
+            const ok = await sleep(12);
+            if (!ok || isHalted()) return;
+          }
 
-        setActiveItem((prev) => (prev ? { ...prev, currentOutput: fullOutput, isTypingOutput: false } : null));
-        const pauseOk = await sleep(250);
-        if (!pauseOk || cancelledRef.current) return;
+          setActiveItem((prev) => (prev ? { ...prev, currentOutput: fullOutput, isTypingOutput: false } : null));
+          const pauseOk = await sleep(250);
+          if (!pauseOk || isHalted()) return;
 
-        // 5. Commit completed question & answer to history log
-        setHistory((prev) => [...prev, { command: q.command, output: q.output }]);
-        setCommandList((prev) => [...prev, q.command]);
-        setActiveItem(null);
+          // 5. Commit completed question & answer to history log
+          setHistory((prev) => [...prev, { command: q.command, output: q.output }]);
+          setCommandList((prev) => [...prev, q.command]);
+          setActiveItem(null);
 
-        // Pause before typing next command
-        if (qIdx < questions.length - 1) {
+          // Pause before typing next command
           const nextOk = await sleep(650);
-          if (!nextOk || cancelledRef.current) return;
+          if (!nextOk || isHalted()) return;
         }
+
+        // Loop pause after full cycle
+        const cyclePause = await sleep(2800);
+        if (!cyclePause || isHalted()) return;
+
+        // Clear terminal buffer to restart clean cycle
+        setHistory([]);
+        await sleep(350);
       }
 
       setIsExecuting(false);
@@ -165,8 +186,26 @@ export function TerminalEmulator({ data }: { data?: PortfolioData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Listen for any external questions/commands dispatched to the terminal
+  useEffect(() => {
+    const handleExternalCmd = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) {
+        userInteractedRef.current = true;
+        stopIntro();
+        executeCommand(customEvent.detail);
+      }
+    };
+    window.addEventListener("terminal-command", handleExternalCmd);
+    return () => {
+      window.removeEventListener("terminal-command", handleExternalCmd);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const executeCommand = (cmdRaw: string) => {
-    // If auto-typing is active when user interacts, gracefully stop it
+    // If user clicked any button or asked any command, permanently stop the auto loop
+    userInteractedRef.current = true;
     stopIntro();
 
     const cmd = cmdRaw.trim().toLowerCase();
@@ -323,7 +362,10 @@ Reach out directly via email (${pInfo.email}) or phone (${pInfo.phone})!`;
             </div>
           )}
           <button
-            onClick={startIntro}
+            onClick={() => {
+              userInteractedRef.current = false;
+              startIntro();
+            }}
             title="Replay terminal intro sequence"
             className="text-slate-400 hover:text-cyan-400 transition-colors p-1 rounded hover:bg-slate-800"
             aria-label="Replay terminal intro"
@@ -338,9 +380,7 @@ Reach out directly via email (${pInfo.email}) or phone (${pInfo.phone})!`;
         ref={outputRef}
         className="p-4 font-mono text-xs space-y-3 flex-1 overflow-y-auto overflow-x-hidden selection:bg-cyan-500/30"
       >
-        <div className="text-slate-500 text-[11px]">
-          DevAgent Interactive Terminal [Version 4.2.0-lts]. Type <span className="text-cyan-400 font-bold">help</span> for command list.
-        </div>
+
 
         {/* Completed History Commands */}
         {history.map((item, idx) => (
@@ -436,7 +476,13 @@ Reach out directly via email (${pInfo.email}) or phone (${pInfo.phone})!`;
           <input
             type="text"
             value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length > 0) {
+                userInteractedRef.current = true;
+                stopIntro();
+              }
+              setInputVal(e.target.value);
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Type a command (e.g. 'help', 'projects', 'hire')..."
             className="w-full bg-transparent border-0 outline-none text-white placeholder-slate-500 font-mono"
