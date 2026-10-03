@@ -4,7 +4,7 @@
   "description": "Monu Saini's Interactive Terminal Resume & Developer Card — Python Developer & AI Automation Engineer",
   "main": "./bin/index.js",
   "bin": {
-    "tech2saini": "./bin/index.js"
+    "tech2saini": "bin/index.js"
   },
   "scripts": {
     "start": "node ./bin/index.js",
@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tech2saini/monu-saini-portfolio.git",
+    "url": "git+https://github.com/tech2saini/monu-saini-portfolio.git",
     "directory": "cli"
   },
   "bugs": {
