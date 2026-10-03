@@ -45,6 +45,7 @@
 - **Dedicated SEO Routes**: Full-featured dedicated `/about` (with Schema.org `Person` JSON-LD, entity aliases, media gallery, and `/llms.txt`) and `/contact` (with `ContactPage` Schema.org and interactive scheduling).
 - **File & Image Storage**: **Vercel Blob Storage** (`@vercel/blob` integrated via `/api/upload` & `FileUpload.tsx`) for screenshots, PDFs, and assets, with local base64 fallback. Uploaded resume (`resumeUrl`) and avatar (`avatarUrl`) persist in Firebase and display view/download links.
 - **AI Agent API**: Next.js App Router Route Handler at [`src/app/api/chat/route.ts`](./src/app/api/chat/route.ts) with intelligent semantic response synthesis.
+- **Interactive Terminal Resume NPM Package**: Maintained at [`cli/`](./cli/) under package name `tech2saini` with zero external runtime dependencies for instant execution via `npx tech2saini` and `npx tech2saini --connect --role=python-sde`.
 
 ---
 
